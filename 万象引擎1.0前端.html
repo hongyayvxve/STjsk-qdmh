@@ -3,7 +3,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>A.U.T.O. SESSION INIT</title>
 <style>
 :root{
@@ -13,9 +13,6 @@
   --text0:rgba(165,225,255,0.92);--text1:rgba(105,185,225,0.70);--text2:rgba(65,145,185,0.50);
   --panel:rgba(8,18,36,0.96);
   --glow:0 0 14px rgba(0,200,255,0.22);
-  --tab-h:54px;
-  --safe-b:env(safe-area-inset-bottom,0px);
-  --safe-t:env(safe-area-inset-top,0px);
 }
 body.light{
   --bg:#ccd8e8;--bg1:#d4dff0;--bg2:#c0cede;
@@ -26,79 +23,110 @@ body.light{
   --glow:0 0 10px rgba(0,80,130,0.18);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Courier New',Consolas,monospace;}
+html{height:100%;overflow:hidden;}
+body{height:100%;overflow:hidden;background:var(--bg);font-family:'Courier New',Consolas,monospace;}
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,rgba(0,180,255,0.018) 0,rgba(0,180,255,0.018) 1px,transparent 1px,transparent 4px);
 }
 
-/* LAYOUT */
-.shell{position:fixed;inset: 0;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;overflow: hidden;}
+/* SHELL */
+.shell{
+  position:relative;z-index:1;
+  width:100%;height:100%;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
 
-/* STATUS */
+/* STATUS BAR */
 .sb{
-  flex-shrink:0;padding:calc(6px + var(--safe-t)) 16px 6px;
+  flex-shrink:0;padding:8px 16px;
   display:flex;align-items:center;justify-content:space-between;
-  background:rgba(4,10,22,0.92);border-bottom:1px solid var(--border1);backdrop-filter:blur(8px);
+  background:rgba(4,10,22,0.92);border-bottom:1px solid var(--border1);
 }
 body.light .sb{background:rgba(195,218,240,0.92);}
 .sb-side{font-size:10px;color:var(--text2);letter-spacing:1px;}
-.sb-mid{font-size:10px;letter-spacing:2.5px;color:var(--c1);display:flex;align-items:center;gap:6px;text-transform:uppercase;}
+.sb-mid{font-size:10px;letter-spacing:2.5px;color:var(--c1);display:flex;align-items:center;gap:6px;}
 .sb-dot{width:5px;height:5px;border-radius:50%;background:var(--c3);box-shadow:0 0 5px var(--c3);animation:bk 2s ease-in-out infinite;}
 @keyframes bk{0%,100%{opacity:.18}50%{opacity:1}}
 
-/* PAGES */
-.pages{flex:1;min-height: 0;position:relative;overflow:hidden;}
-.page{
-  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(0,180,220,0.10) transparent;
-  padding-bottom:calc(var(--tab-h) + var(--safe-b) + 8px);
-  opacity:0;pointer-events:none;transform:translateY(8px);
-  transition:opacity .2s,transform .2s;
-}
-.page::-webkit-scrollbar{width:2px;}
-.page::-webkit-scrollbar-thumb{background:rgba(0,180,220,0.10);}
-.page.on{opacity:1;pointer-events:auto;transform:translateY(0);}
-
-/* TABS */
+/* TABS — top */
 .tabs{
-  position:fixed;bottom:0;left:0;right:0;z-index:100;
-  height:calc(var(--tab-h) + var(--safe-b));padding-bottom:var(--safe-b);
-  display:flex;background:rgba(4,10,22,0.97);border-top:1px solid var(--border1);backdrop-filter:blur(14px);
+  flex-shrink:0;display:flex;
+  background:rgba(4,10,22,0.97);border-bottom:1px solid var(--border1);
 }
 body.light .tabs{background:rgba(200,222,244,0.97);}
 .tab{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  flex:1;padding:11px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;
   cursor:pointer;position:relative;user-select:none;
 }
-.tab::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:linear-gradient(90deg,transparent,var(--c1),var(--c3),transparent);transition:width .24s;box-shadow:0 0 5px var(--c1);}
+.tab::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:linear-gradient(90deg,transparent,var(--c1),var(--c3),transparent);transition:width .24s;}
 .tab.on::after{width:52%;}
-.t-ico{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:5px;transition:all .2s;}
+.t-ico{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:all .2s;}
 .tab.on .t-ico{background:rgba(0,180,220,0.10);border:1px solid var(--border1);box-shadow:var(--glow);}
-.t-ico svg{width:17px;height:17px;}
+.t-ico svg{width:16px;height:16px;}
 .tab svg path,.tab svg circle,.tab svg polygon,.tab svg rect,.tab svg polyline,.tab svg line{stroke:var(--text2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s;}
 .tab.on svg path,.tab.on svg circle,.tab.on svg polygon,.tab.on svg rect,.tab.on svg polyline,.tab.on svg line{stroke:var(--c1);}
 .t-lbl{font-size:9px;color:var(--text2);letter-spacing:1.2px;text-transform:uppercase;transition:color .2s;}
 .tab.on .t-lbl{color:var(--c1);}
 
-/* COMMON */
-.ph{padding:16px 16px 12px;border-bottom:1px solid var(--border0);background:linear-gradient(150deg,rgba(0,55,100,0.14),transparent 70%);}
+/* PAGES CONTAINER */
+.pages{
+  flex:1;
+  min-height:0;
+  position:relative;
+  overflow:hidden;
+}
+
+/* INDIVIDUAL PAGE */
+.page{
+  position:absolute;
+  top:0;right:0;bottom:0;left:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(6px);
+  transition:opacity .18s,transform .18s;
+}
+.page.on{opacity:1;pointer-events:auto;transform:translateY(0);}
+
+/* COMMON COMPONENTS */
+.ph{padding:14px 16px 12px;border-bottom:1px solid var(--border0);background:linear-gradient(150deg,rgba(0,55,100,0.14),transparent 70%);}
 .ph-tag{font-size:9px;letter-spacing:2.2px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
 .ph-tag::before{content:'◈';color:var(--c1);opacity:.55;font-size:8px;}
-.ph-ttl{font-size:18px;font-weight:700;letter-spacing:2.5px;color:var(--c1);text-shadow:var(--glow);}
+.ph-ttl{font-size:17px;font-weight:700;letter-spacing:2.5px;color:var(--c1);text-shadow:var(--glow);}
 .ph-sub{font-size:11px;color:var(--text1);margin-top:4px;line-height:1.65;letter-spacing:.38px;}
 
-.blk{padding:14px 16px;}
+.blk{padding:13px 16px;}
 .blk+.blk{padding-top:0;}
 .sec{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--c1);opacity:.78;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
 .sec::before{content:'▶';font-size:6px;opacity:.65;}
 .sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border1),transparent);}
 .hdiv{height:1px;margin:0 16px;background:linear-gradient(90deg,transparent,var(--border1) 30%,var(--border1) 70%,transparent);}
-
 .card{background:rgba(0,18,42,0.55);border:1px solid var(--border0);border-left:2px solid rgba(0,180,220,0.25);border-radius:4px;padding:13px;}
 body.light .card{background:rgba(190,215,240,0.45);}
 
-/* XP ITEMS */
+/* MOOD */
+.mood-box{background:rgba(0,14,34,0.46);border:1px solid var(--border0);border-radius:4px;padding:13px;}
+body.light .mood-box{background:rgba(190,215,240,0.38);}
+.mood-sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;outline:none;cursor:pointer;margin:10px 0 6px;background:linear-gradient(90deg,rgba(0,70,130,0.35),rgba(0,200,255,0.30));border-radius:2px;}
+.mood-sl::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--c1);cursor:pointer;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);box-shadow:0 0 9px rgba(0,200,255,0.50);}
+.mood-ends{display:flex;justify-content:space-between;}
+.mood-end{font-size:9px;color:var(--text2);letter-spacing:.4px;}
+.mood-val{text-align:center;margin-top:6px;font-size:12px;font-weight:700;color:var(--c1);letter-spacing:2.5px;text-transform:uppercase;}
+
+/* SCENE GRID */
+.sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sc-card{background:rgba(0,16,40,0.52);border:1px solid var(--border0);border-top:2px solid transparent;border-radius:4px;padding:12px 10px;cursor:pointer;transition:all .22s;}
+body.light .sc-card{background:rgba(190,215,240,0.40);}
+.sc-card.on{background:rgba(0,65,115,0.28);border-color:var(--border2);border-top-color:var(--c1);box-shadow:var(--glow);}
+.sc-em{font-size:17px;margin-bottom:4px;display:block;}
+.sc-t{font-size:12px;font-weight:700;color:var(--text0);margin-bottom:2px;letter-spacing:.8px;}
+.sc-s{font-size:10px;color:var(--text2);letter-spacing:.4px;}
+
+/* XP LIST */
 .xp-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border0);}
 .xp-row:last-child{border-bottom:none;}
 .xp-ico{font-size:14px;width:22px;text-align:center;flex-shrink:0;}
@@ -113,68 +141,67 @@ body.light .card{background:rgba(190,215,240,0.45);}
 .sw::after{content:'';position:absolute;top:4px;left:4px;width:12px;height:12px;border-radius:2px;background:rgba(0,160,200,0.28);transition:all .28s cubic-bezier(.34,1.56,.64,1);}
 .sw.on{background:rgba(0,130,180,0.18);border-color:var(--c1);box-shadow:0 0 7px rgba(0,180,220,0.20);}
 .sw.on::after{left:22px;background:linear-gradient(135deg,var(--c2),var(--c1));box-shadow:0 0 5px rgba(0,200,255,0.45);}
-.sw.disabled{opacity:.32;cursor:not-allowed;}
-
-/* SCENE GRID */
-.sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.sc-card{background:rgba(0,16,40,0.52);border:1px solid var(--border0);border-top:2px solid transparent;border-radius:4px;padding:13px 11px;cursor:pointer;transition:all .22s;}
-body.light .sc-card{background:rgba(190,215,240,0.40);}
-.sc-card.on{background:rgba(0,65,115,0.28);border-color:var(--border2);border-top-color:var(--c1);box-shadow:var(--glow);}
-.sc-em{font-size:18px;margin-bottom:5px;display:block;}
-.sc-t{font-size:12px;font-weight:700;color:var(--text0);margin-bottom:2px;letter-spacing:.8px;}
-.sc-s{font-size:10px;color:var(--text2);letter-spacing:.4px;}
-
-/* MOOD */
-.mood-box{background:rgba(0,14,34,0.46);border:1px solid var(--border0);border-radius:4px;padding:13px;}
-body.light .mood-box{background:rgba(190,215,240,0.38);}
-.mood-sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;outline:none;cursor:pointer;margin:10px 0 6px;background:linear-gradient(90deg,rgba(0,70,130,0.35),rgba(0,200,255,0.30));border-radius:2px;}
-.mood-sl::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--c1);cursor:pointer;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);box-shadow:0 0 9px rgba(0,200,255,0.50);}
-.mood-ends{display:flex;justify-content:space-between;}
-.mood-end{font-size:9px;color:var(--text2);letter-spacing:.4px;}
-.mood-val{text-align:center;margin-top:6px;font-size:12px;font-weight:700;color:var(--c1);letter-spacing:2.5px;text-transform:uppercase;}
-
-/* PROTO CARDS */
-.proto{background:rgba(0,14,36,0.52);border:1px solid var(--border0);border-left:2px solid rgba(0,220,180,0.32);border-radius:4px;padding:13px;margin-bottom:8px;}
-body.light .proto{background:rgba(190,215,240,0.42);}
-.proto:last-child{margin-bottom:0;}
-.proto-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.proto-name{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--c3);text-transform:uppercase;}
-.proto-badge{font-size:8px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;}
-.proto-badge.active{background:rgba(0,220,180,0.10);border:1px solid rgba(0,220,180,0.28);color:var(--c3);}
-.proto-badge.standby{background:rgba(65,145,185,0.08);border:1px solid var(--border0);color:var(--text2);}
-.proto-desc{font-size:11px;color:var(--text1);line-height:1.70;letter-spacing:.35px;}
-.proto-rules{margin-top:8px;}
-.proto-rule{font-size:10px;color:var(--text2);line-height:1.60;letter-spacing:.3px;padding:4px 0;border-top:1px solid var(--border0);}
-.proto-rule:first-child{border-top:none;}
-.proto-rule strong{color:var(--c1);}
 
 /* DATA GRID */
 .dg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .dc{background:rgba(0,12,32,0.46);border:1px solid var(--border0);border-radius:4px;padding:10px 12px;}
 body.light .dc{background:rgba(190,215,240,0.40);}
 .dc-l{font-size:8px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:4px;}
-.dc-v{font-size:14px;font-weight:700;color:var(--c1);letter-spacing:.8px;}
+.dc-v{font-size:13px;font-weight:700;color:var(--c1);letter-spacing:.8px;}
 .dc-s{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:.3px;}
 
-/* CHAR */
-.cid{margin:14px 16px 0;padding:16px;background:rgba(0,14,38,0.65);border:1px solid var(--border1);border-top:2px solid var(--c1);border-radius:4px;display:flex;gap:13px;align-items:flex-start;}
+/* PROTOCOL CARDS */
+.proto{background:rgba(0,14,36,0.52);border:1px solid var(--border0);border-left:2px solid rgba(0,220,180,0.32);border-radius:4px;padding:13px;margin-bottom:8px;}
+body.light .proto{background:rgba(190,215,240,0.42);}
+.proto:last-child{margin-bottom:0;}
+.proto-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.proto-name{font-size:10px;font-weight:700;letter-spacing:1.8px;color:var(--c3);text-transform:uppercase;}
+.proto-badge{font-size:8px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;}
+.proto-badge.active{background:rgba(0,220,180,0.10);border:1px solid rgba(0,220,180,0.28);color:var(--c3);}
+.proto-badge.standby{background:rgba(65,145,185,0.08);border:1px solid var(--border0);color:var(--text2);}
+.proto-desc{font-size:11px;color:var(--text1);line-height:1.70;letter-spacing:.35px;}
+.proto-rules{margin-top:8px;}
+.proto-rule{font-size:10px;color:var(--text2);line-height:1.62;letter-spacing:.3px;padding:4px 0;border-top:1px solid var(--border0);}
+.proto-rule:first-child{border-top:none;}
+.proto-rule strong{color:var(--c1);}
+
+/* CONFLICT BOX */
+.conflict-box{margin:0 16px 12px;padding:10px 13px;background:rgba(255,80,30,0.07);border:1px solid rgba(255,107,53,0.28);border-radius:4px;display:none;}
+.conflict-box.show{display:block;}
+.conflict-title{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--c4);margin-bottom:5px;text-transform:uppercase;}
+.conflict-list{font-size:10px;color:rgba(255,107,53,0.75);line-height:1.65;letter-spacing:.35px;}
+
+/* START */
+.start-wrap{padding:12px 16px 20px;}
+.start-btn{
+  width:100%;padding:14px;background:transparent;border:1px solid var(--c1);border-radius:4px;
+  color:var(--c1);font-size:11px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;
+  cursor:pointer;font-family:inherit;position:relative;overflow:hidden;transition:all .3s;
+}
+.start-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.09),transparent);transform:translateX(-100%);transition:transform .5s;}
+.start-btn:hover{background:rgba(0,180,220,0.08);box-shadow:0 0 20px rgba(0,180,220,0.18);}
+.start-btn:hover::before{transform:translateX(100%);}
+.start-note{font-size:10px;color:var(--text2);letter-spacing:.5px;text-align:center;margin-top:6px;line-height:1.60;}
+
+/* CHAR PAGE */
+.cid{margin:13px 16px 0;padding:15px;background:rgba(0,14,38,0.65);border:1px solid var(--border1);border-top:2px solid var(--c1);border-radius:4px;display:flex;gap:13px;align-items:flex-start;}
 body.light .cid{background:rgba(190,215,240,0.65);}
-.cid-orb{width:54px;height:54px;border-radius:6px;flex-shrink:0;background:rgba(0,50,105,0.55);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:var(--glow);}
+.cid-orb{width:52px;height:52px;border-radius:6px;flex-shrink:0;background:rgba(0,50,105,0.55);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:21px;box-shadow:var(--glow);}
 .cid-id{font-size:9px;letter-spacing:2px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;}
-.cid-name{font-size:17px;font-weight:700;letter-spacing:2.5px;color:var(--c1);text-shadow:var(--glow);}
+.cid-name{font-size:16px;font-weight:700;letter-spacing:2.5px;color:var(--c1);text-shadow:var(--glow);}
 .cid-alias{font-size:11px;color:var(--text1);margin-top:4px;letter-spacing:.5px;}
 
 .g-wrap{background:rgba(0,10,28,0.50);border:1px solid var(--border0);border-radius:4px;padding:13px;}
 body.light .g-wrap{background:rgba(190,215,240,0.40);}
 .g-row{display:flex;gap:6px;background:rgba(0,0,0,0.28);padding:5px;border-radius:3px;}
 body.light .g-row{background:rgba(165,195,225,0.38);}
-.g-btn{flex:1;padding:10px;border:none;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:1.8px;transition:all .28s cubic-bezier(.34,1.56,.64,1);}
-.g-btn.male{background:transparent;color:rgba(80,130,220,0.36);}
+.g-btn{flex:1;padding:10px;border:none;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:1.8px;transition:all .28s cubic-bezier(.34,1.56,.64,1);background:transparent;}
+.g-btn.male{color:rgba(80,130,220,0.36);}
 .g-btn.male.on{background:linear-gradient(135deg,rgba(18,52,175,0.44),rgba(48,98,218,0.34));color:#88aaff;border:1px solid rgba(78,122,218,0.44);box-shadow:0 0 14px rgba(48,98,220,0.24);}
-.g-btn.female{background:transparent;color:rgba(180,55,120,0.36);}
+.g-btn.female{color:rgba(180,55,120,0.36);}
 .g-btn.female.on{background:linear-gradient(135deg,rgba(148,18,74,0.34),rgba(198,50,118,0.28));color:#ff90c0;border:1px solid rgba(198,74,133,0.40);box-shadow:0 0 14px rgba(198,50,118,0.22);}
 .g-disp{text-align:center;margin-top:10px;font-size:11px;color:var(--text2);letter-spacing:1.2px;}
-.g-disp strong{font-size:15px;font-weight:700;margin-left:6px;letter-spacing:2px;}
+.g-disp strong{font-size:14px;font-weight:700;margin-left:6px;letter-spacing:2px;}
 
 .tag-cloud{display:flex;flex-wrap:wrap;gap:6px;}
 .tag{padding:4px 10px;border-radius:3px;font-size:10px;font-weight:600;letter-spacing:.7px;}
@@ -203,40 +230,22 @@ body.light .g-row{background:rgba(165,195,225,0.38);}
 .tl-lbl{font-size:9px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
 .tl-txt{font-size:11px;color:var(--text1);line-height:1.65;letter-spacing:.3px;}
 
-/* SETTINGS */
-.s-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border0);}
+/* SETTINGS PAGE */
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border0);}
 .s-row-l{flex:1;margin-right:12px;}
 .s-row-t{font-size:12px;font-weight:600;color:var(--text0);letter-spacing:.6px;}
 .s-row-s{font-size:10px;color:var(--text2);margin-top:2px;letter-spacing:.3px;}
 
-.theme-row{display:flex;gap:8px;padding:12px 16px;}
-.t-opt{flex:1;padding:11px;border-radius:4px;border:1px solid var(--border0);text-align:center;cursor:pointer;font-size:10px;letter-spacing:1.2px;color:var(--text1);font-family:inherit;background:transparent;transition:all .2s;}
+.theme-row{display:flex;gap:8px;padding:11px 16px;}
+.t-opt{flex:1;padding:10px;border-radius:4px;border:1px solid var(--border0);text-align:center;cursor:pointer;font-size:10px;letter-spacing:1.2px;color:var(--text1);font-family:inherit;background:transparent;transition:all .2s;}
 .t-opt.on{border-color:var(--c1);color:var(--c1);background:rgba(0,160,200,0.07);}
 
-.about{margin:14px 16px 10px;padding:15px;background:rgba(0,14,38,0.52);border:1px solid var(--border0);border-left:3px solid var(--c1);border-radius:4px;display:flex;gap:13px;align-items:center;}
+.about{margin:13px 16px 20px;padding:14px;background:rgba(0,14,38,0.52);border:1px solid var(--border0);border-left:3px solid var(--c1);border-radius:4px;display:flex;gap:13px;align-items:center;}
 body.light .about{background:rgba(190,215,240,0.52);}
-.about-ico{font-size:26px;}
-.about-name{font-size:13px;font-weight:700;letter-spacing:2.5px;color:var(--c1);}
+.about-ico{font-size:24px;}
+.about-name{font-size:12px;font-weight:700;letter-spacing:2.5px;color:var(--c1);}
 .about-ver{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:1.2px;}
 .about-desc{font-size:10px;color:var(--text2);margin-top:5px;letter-spacing:.4px;line-height:1.65;}
-
-/* START */
-.start-wrap{padding:14px 16px 10px;}
-.start-btn{
-  width:100%;padding:15px;background:transparent;border:1px solid var(--c1);border-radius:4px;
-  color:var(--c1);font-size:11px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;
-  cursor:pointer;font-family:inherit;position:relative;overflow:hidden;transition:all .3s;
-}
-.start-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.09),transparent);transform:translateX(-100%);transition:transform .5s;}
-.start-btn:hover{background:rgba(0,180,220,0.08);box-shadow:0 0 20px rgba(0,180,220,0.18);}
-.start-btn:hover::before{transform:translateX(100%);}
-.start-note{font-size:10px;color:var(--text2);letter-spacing:.5px;text-align:center;margin-top:6px;line-height:1.60;}
-
-/* CONFLICT ALERT */
-.conflict-box{margin:0 16px 12px;padding:10px 13px;background:rgba(255,80,30,0.07);border:1px solid rgba(255,107,53,0.28);border-radius:4px;display:none;}
-.conflict-box.show{display:block;}
-.conflict-title{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--c4);margin-bottom:5px;text-transform:uppercase;}
-.conflict-list{font-size:10px;color:rgba(255,107,53,0.75);line-height:1.65;letter-spacing:.35px;}
 </style>
 </head>
 <body>
@@ -248,9 +257,24 @@ body.light .about{background:rgba(190,215,240,0.52);}
   <span class="sb-side">L3·ON</span>
 </div>
 
+<div class="tabs" id="tabBar">
+  <div class="tab on" data-p="xp">
+    <div class="t-ico"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+    <span class="t-lbl">场景XP</span>
+  </div>
+  <div class="tab" data-p="char">
+    <div class="t-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <span class="t-lbl">角色</span>
+  </div>
+  <div class="tab" data-p="set">
+    <div class="t-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+    <span class="t-lbl">设定</span>
+  </div>
+</div>
+
 <div class="pages">
 
-<!-- PAGE: XP -->
+<!-- XP PAGE -->
 <div class="page on" id="pg-xp">
   <div class="ph">
     <div class="ph-tag">SCENE &amp; XP CONFIG</div>
@@ -293,43 +317,47 @@ body.light .about{background:rgba(190,215,240,0.52);}
 
   <div class="blk">
     <div class="sec">美学协议</div>
+
     <div class="proto" id="proto-acp">
       <div class="proto-head">
         <div class="proto-name">Aesthetic_Core_Protocol</div>
         <div class="proto-badge standby" id="badge-acp">STANDBY</div>
       </div>
-      <div class="proto-desc">五维扫描：外装→内衣→丝袜→鞋履→首饰。分层材质描写，感官具象化音效，高位女性"物理不朽"秩序感。</div>
+      <div class="proto-desc">CoT链：识别年龄 → 阶级映射 → 体型锁定 → 五维扫描（外装→内衣→丝袜→鞋履→首饰）→ 感官具象化音效。</div>
       <div class="proto-rules">
-        <div class="proto-rule"><strong>【分层描写】</strong> 严禁笼统概括，细化每层材质与肢体物理作用力（勒痕/受压/紧绷感）</div>
-        <div class="proto-rule"><strong>【感官具象化】</strong> 必须描述高跟鞋敲击特定地面（大理石/金属/木质）的音质与节奏</div>
+        <div class="proto-rule"><strong>【识别跳过】</strong> 外貌为老婆婆/老奶奶/步入暮年 → SKIP，一笔带过，严禁触发后续穿搭描写</div>
+        <div class="proto-rule"><strong>【体型锁定】</strong> 御姐/美妇 → 10-12cm针跟；少女/娇小 → 6-9cm猫跟，严禁强制配置超高跟</div>
+        <div class="proto-rule"><strong>【分层描写】</strong> 严禁笼统概括，细化每层材质、光泽及对肢体的物理作用力（勒痕/受压/紧绷感）</div>
+        <div class="proto-rule"><strong>【感官具象化】</strong> 必须描述鞋跟敲击特定地面（大理石/金属/木质）的音质与节奏，严禁使用虚词</div>
         <div class="proto-rule"><strong>【无损秩序】</strong> 高位女性服饰呈现"绝对整齐"与"物理不朽感"，丝袜时刻保持月华凝脂质感</div>
-        <div class="proto-rule"><strong>【跳过逻辑】</strong> 外貌为老婆婆/老奶奶时，一笔带过，严禁触发后续穿搭描写</div>
       </div>
     </div>
+
     <div class="proto" id="proto-rhm">
       <div class="proto-head">
         <div class="proto-name">Resource_Hierarchy_Matrix</div>
         <div class="proto-badge standby" id="badge-rhm">STANDBY</div>
       </div>
-      <div class="proto-desc">三阶物料体系：Apex（月华凝脂纤维·权力律动音质）/ Elite（亮面油青·高压步态）/ Common（混纺质感·环境音效反馈）。</div>
+      <div class="proto-desc">三阶物料体系侧写统治力。通过光影解析度与材质稀有感呈现阶级，严禁堆砌形容词。</div>
       <div class="proto-rules">
-        <div class="proto-rule"><strong>【Apex】</strong> 月华凝脂/实验室生物纤维，&lt;15D，随体温流动；外衣记忆型流光面料，落地声清冷空灵</div>
-        <div class="proto-rule"><strong>【Elite】</strong> 顶级亮面油青/丝绸质感，重磅真丝/漆皮，落地声急促清脆富有张力</div>
-        <div class="proto-rule"><strong>【Common】</strong> 优质混纺，允许活动褶皱，品牌量产鞋履，扎实日常行走声</div>
-        <div class="proto-rule"><strong>【核心要求】</strong> 通过光影解析度与材质稀有感侧写角色统治力，而非堆砌形容词</div>
+        <div class="proto-rule"><strong>【Apex】</strong> 月华凝脂/实验室生物纤维，&lt;15D，随体温光影流动呈第二层皮肤；记忆型流光面料，物理不朽；落地声清冷空灵</div>
+        <div class="proto-rule"><strong>【Elite】</strong> 顶级亮面油青/丝绸，强调油脂反射光泽；重磅真丝/漆皮，精细手工缝线与昂贵五金；落地声急促清脆富张力</div>
+        <div class="proto-rule"><strong>【Common】</strong> 优质混纺，关节处允许轻微活动褶皱；品牌量产鞋履；扎实日常行走声，受地面材质影响明显</div>
+        <div class="proto-rule"><strong>【核心要求】</strong> 光影解析度与材质稀有感侧写统治力，而非形容词堆砌</div>
       </div>
     </div>
+
     <div class="proto" id="proto-lgc">
       <div class="proto-head">
-        <div class="proto-name">Logic_Guard_Correction_Protocol</div>
+        <div class="proto-name">Logic_Guard_Correction</div>
         <div class="proto-badge standby" id="badge-lgc">STANDBY</div>
       </div>
-      <div class="proto-desc">逻辑冲突解决与细节强制补完机制。阶级美学优先于剧情冲突，遗漏五维自动补全。</div>
+      <div class="proto-desc">阶级美学优先级凌驾于剧情冲突之上。遗漏五维任意层自动强制补完。</div>
       <div class="proto-rules">
-        <div class="proto-rule"><strong>【冲突优先】</strong> 人设冲突（落魄/战斗中）时，仍优先执行阶级美学——废墟中也要描写紧致丝袜与挺拔鞋跟</div>
-        <div class="proto-rule"><strong>【强制补完】</strong> 遗漏声响反馈或五维分层任意一层时，下一段以视角转动方式补全足部或内衣勒痕特写</div>
+        <div class="proto-rule"><strong>【冲突强制】</strong> 人设冲突（落魄/战斗中）时，仍优先执行阶级美学——废墟中也要描写紧致丝袜与断掉却依然挺拔的鞋跟</div>
+        <div class="proto-rule"><strong>【强制补完】</strong> 遗漏声响反馈或五维分层任意一层时，下一段必须以视角转动方式补全足部或内衣勒痕特写</div>
         <div class="proto-rule"><strong>【秩序修复】</strong> 战斗间隙/结束后，高位女性第一时间理顺衣褶，确认丝袜平整度</div>
-        <div class="proto-rule"><strong>【语言风格】</strong> 冷冽、华丽且充满侵略性；坚决杜绝任何形式的松弛感</div>
+        <div class="proto-rule"><strong>【语言风格】</strong> 极致冷冽、华丽且充满侵略性；坚决杜绝任何形式的松弛感</div>
       </div>
     </div>
   </div>
@@ -345,7 +373,7 @@ body.light .about{background:rgba(190,215,240,0.52);}
   </div>
 </div>
 
-<!-- PAGE: CHAR -->
+<!-- CHAR PAGE -->
 <div class="page" id="pg-char">
   <div class="cid">
     <div class="cid-orb">✧</div>
@@ -411,7 +439,7 @@ body.light .about{background:rgba(190,215,240,0.52);}
   </div>
 </div>
 
-<!-- PAGE: SETTINGS -->
+<!-- SETTINGS PAGE -->
 <div class="page" id="pg-set">
   <div class="ph">
     <div class="ph-tag">SYSTEM CONFIG</div>
@@ -433,10 +461,10 @@ body.light .about{background:rgba(190,215,240,0.52);}
   <div class="blk">
     <div class="sec">系统数据</div>
     <div class="dg" style="margin-bottom:12px;">
-      <div class="dc"><div class="dc-l">位置</div><div class="dc-v" style="font-size:12px;">L3 POINT</div><div class="dc-s">地月拉格朗日点</div></div>
-      <div class="dc"><div class="dc-l">协议</div><div class="dc-v" style="font-size:12px;">ACTIVE</div><div class="dc-s">叙事协议在线</div></div>
-      <div class="dc"><div class="dc-l">美学核心</div><div class="dc-v" style="font-size:12px;">ON</div><div class="dc-s">Aesthetic_Core</div></div>
-      <div class="dc"><div class="dc-l">约束</div><div class="dc-v" style="font-size:12px;">NONE</div><div class="dc-s">外部限制已解除</div></div>
+      <div class="dc"><div class="dc-l">位置</div><div class="dc-v" style="font-size:11px;">L3 POINT</div><div class="dc-s">地月拉格朗日点</div></div>
+      <div class="dc"><div class="dc-l">协议</div><div class="dc-v" style="font-size:11px;">ACTIVE</div><div class="dc-s">叙事协议在线</div></div>
+      <div class="dc"><div class="dc-l">美学核心</div><div class="dc-v" style="font-size:11px;">ON</div><div class="dc-s">Aesthetic_Core</div></div>
+      <div class="dc"><div class="dc-l">约束</div><div class="dc-v" style="font-size:11px;">NONE</div><div class="dc-s">外部限制已解除</div></div>
     </div>
   </div>
 
@@ -444,7 +472,7 @@ body.light .about{background:rgba(190,215,240,0.52);}
     <div class="about-ico">◈</div>
     <div>
       <div class="about-name">A.U.T.O. TERMINAL</div>
-      <div class="about-ver">v2.1 · WORLD ENGINE · L3 STATION</div>
+      <div class="about-ver">v2.3 · WORLD ENGINE · L3 STATION</div>
       <div class="about-desc">
         晏创造 · 地月L3拉格朗日点 · 深度叙事协议<br>
         Aesthetic_Core · Resource_Hierarchy · Logic_Guard 已加载
@@ -454,71 +482,53 @@ body.light .about{background:rgba(190,215,240,0.52);}
 </div>
 
 </div><!-- /pages -->
-
-<div class="tabs" id="tabBar">
-  <div class="tab on" data-p="xp">
-    <div class="t-ico"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-    <span class="t-lbl">场景XP</span>
-  </div>
-  <div class="tab" data-p="char">
-    <div class="t-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-    <span class="t-lbl">角色</span>
-  </div>
-  <div class="tab" data-p="set">
-    <div class="t-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-    <span class="t-lbl">设定</span>
-  </div>
-</div>
-
-</div>
+</div><!-- /shell -->
 
 <script>
-/* ═══ DATA ═══ */
 var MOODS=['CRITICAL','DEPRESSED','SUPPRESSED','UNEASY','FLUCTUANT','STABLE','ALERT','ELEVATED','BRIGHT'];
 
-// conflict rules: if item A is on and item B is on, show warning
-// format: [idxA, idxB, message]
 var CONFLICTS=[
-  [2,3,'「神女血脉显化」与「人设严格模式」在超自然感知的显化程度上存在分歧，建议二选一'],
-  [4,6,'「双重身份张力」与「情绪崩溃可写」同时激活时，剧情可能快速失控，确认人设能否承载'],
-  [7,9,'「美学协议激活」与「逻辑守护协议」同时开启时，极端场景下的逻辑压力极大，建议评估']
+  [2,3,'「慢热渐进」与「高密度叙事」节奏方向直接对立，二选一'],
+  [4,11,'「神女血脉显化」与「严格人设模式」在超自然感知显化程度上存在分歧，建议二选一'],
+  [5,6,'「双重身份张力」与「情绪崩溃可写」同时激活时，剧情可能快速失控，确认人设能否承载'],
+  [8,10,'「美学协议激活」与「逻辑守护协议」同时全开时，极端场景逻辑压力极大，建议评估']
 ];
 
 var XP_DATA=[
-  {i:'🧠',l:'心理张力优先',   s:'侧重内心博弈而非外在行为',          on:true,  group:null},
-  {i:'✦', l:'感官细节描写',   s:'触感/声音/光影的具象化呈现',        on:true,  group:null},
-  {i:'🌊',l:'慢热渐进叙事',   s:'节奏克制，张力在细节中积累',        on:false, group:'pace'},
-  {i:'⚡',l:'高密度叙事',    s:'快节奏，强刺激，省略过渡铺垫',       on:false, group:'pace'},
-  {i:'💫',l:'神女血脉显化',   s:'允许超自然感知能力被觉察',          on:false, group:null},
-  {i:'⚥', l:'双重身份张力',  s:'性别切换作为核心叙事工具',          on:false, group:null},
-  {i:'🩸',l:'情绪崩溃可写',   s:'允许双向障碍发作的真实描绘',        on:false, group:null},
-  {i:'👁', l:'元认知视角',    s:'以旁观者视角审视自身情绪',          on:true,  group:null},
-  {i:'✨',l:'美学协议激活',   s:'Aesthetic_Core 五维渲染全开',       on:false, group:null},
-  {i:'💎',l:'阶级材质渲染',   s:'Resource_Hierarchy 光影解析度优先', on:false, group:null},
-  {i:'🛡', l:'逻辑守护协议',  s:'Logic_Guard 秩序修复·强制补完',    on:false, group:null},
-  {i:'📐',l:'严格人设模式',   s:'决策优先遵从既有人设逻辑',          on:true,  group:null}
+  {i:'🧠',l:'心理张力优先',  s:'侧重内心博弈而非外在行为',         on:true, group:null},
+  {i:'✦', l:'感官细节描写',  s:'触感/声音/光影的具象化呈现',       on:true, group:null},
+  {i:'🌊',l:'慢热渐进叙事',  s:'节奏克制，张力在细节中积累',       on:false,group:'pace'},
+  {i:'⚡',l:'高密度叙事',   s:'快节奏，强刺激，省略过渡铺垫',      on:false,group:'pace'},
+  {i:'💫',l:'神女血脉显化',  s:'允许超自然感知能力被觉察',         on:false,group:null},
+  {i:'⚥', l:'双重身份张力', s:'性别切换作为核心叙事工具',         on:false,group:null},
+  {i:'🩸',l:'情绪崩溃可写',  s:'允许双向障碍发作的真实描绘',       on:false,group:null},
+  {i:'👁', l:'元认知视角',   s:'以旁观者视角审视自身情绪',         on:true, group:null},
+  {i:'✨',l:'美学协议激活',  s:'Aesthetic_Core 五维渲染全开',      on:false,group:null},
+  {i:'💎',l:'阶级材质渲染',  s:'Resource_Hierarchy 光影解析度优先',on:false,group:null},
+  {i:'🛡', l:'逻辑守护协议', s:'Logic_Guard 秩序修复·强制补完',   on:false,group:null},
+  {i:'📐',l:'严格人设模式',  s:'决策优先遵从既有人设逻辑',         on:true, group:null}
 ];
 
 var SCENES=[
-  {em:'🌙',t:'深夜独白',  s:'私密·内省',    on:true},
-  {em:'⚡',t:'暗流角力',  s:'张力·对峙',    on:false},
-  {em:'🌸',t:'初识微妙',  s:'暧昧·试探',    on:false},
-  {em:'🔮',t:'命运交汇',  s:'神秘·宿命',    on:false},
-  {em:'🫀',t:'情感拉锯',  s:'矛盾·纠葛',    on:false},
-  {em:'⚥', t:'形态切换', s:'流动·身份',    on:false},
-  {em:'🩸',t:'病魔阴影',  s:'崩溃·挣扎',    on:false},
-  {em:'◈', t:'自定义',   s:'自由·创造',    on:false}
+  {em:'🌙',t:'深夜独白', s:'私密·内省',  on:true},
+  {em:'⚡',t:'暗流角力', s:'张力·对峙',  on:false},
+  {em:'🌸',t:'初识微妙', s:'暧昧·试探',  on:false},
+  {em:'🔮',t:'命运交汇', s:'神秘·宿命',  on:false},
+  {em:'🫀',t:'情感拉锯', s:'矛盾·纠葛',  on:false},
+  {em:'⚥', t:'形态切换',s:'流动·身份',  on:false},
+  {em:'🩸',t:'病魔阴影', s:'崩溃·挣扎',  on:false},
+  {em:'◈', t:'自定义',  s:'自由·创造',  on:false}
 ];
 
 var SETTINGS=[
-  {t:'叙事视角',         s:'叶青云第一/第三人称限制视角',             sw:true},
-  {t:'元叙事提示',       s:'允许A.U.T.O.跳出角色进行说明',           sw:false},
-  {t:'Aesthetic_Core',  s:'五维穿搭扫描·感官具象化',                sw:true},
-  {t:'Resource_Hierarchy',s:'三阶物料体系·光影解析度侧写统治力',     sw:false},
-  {t:'Logic_Guard',     s:'阶级冲突强制美学·遗漏五维自动补完',      sw:false},
-  {t:'自动场景过渡',     s:'{{char}}可主动切换场景节奏',             sw:true},
-  {t:'命运节点提示',     s:'关键剧情节点前给出预警',                  sw:true},
-  {t:'美学音效反馈',     s:'鞋跟落地声·地面材质音质精确描写',        sw:false}
+  {t:'叙事视角',           s:'叶青云第一/第三人称限制视角',             sw:true},
+  {t:'元叙事提示',         s:'允许A.U.T.O.跳出角色进行说明',           sw:false},
+  {t:'Aesthetic_Core',    s:'五维穿搭扫描·感官具象化',                sw:true},
+  {t:'Resource_Hierarchy',s:'三阶物料体系·光影解析度侧写统治力',      sw:false},
+  {t:'Logic_Guard',       s:'阶级冲突强制美学·遗漏五维自动补完',      sw:false},
+  {t:'自动场景过渡',       s:'{{char}}可主动切换场景节奏',             sw:true},
+  {t:'命运节点提示',       s:'关键剧情节点前给出预警',                  sw:true},
+  {t:'美学音效反馈',       s:'鞋跟落地声·地面材质音质精确描写',        sw:false}
 ];
 
 var CHAR={
@@ -528,8 +538,8 @@ var CHAR={
     ['PERCEP',93,'#00b87a','#00ffcc','神级'],
     ['CHARM',89,'#bb4400','#ff7030','天赋'],
     ['ENDUR',70,'#4455cc','#7788ff','损耗'],
-    ['AURA',98,'#8800cc','#cc44ff','神授'],
-    ['CTRL',76,'#007788','#00ccdd','稳定']
+    ['AURA', 98,'#8800cc','#cc44ff','神授'],
+    ['CTRL', 76,'#007788','#00ccdd','稳定']
   ],
   bio:'同时拥有人类与神女血脉，这个秘密几乎无人知晓，除了某些与他有重大渊源的人物。也因此没有固定性别，可在短短几秒内自主切换男女形态：男性的他俊朗深沉，气质不显得过于夺目；女性的她柔美淡雅，却不过于诱人。INTP摩羯，性格开朗而敏感，冷静过人，散发着独特无比的魅力——可悲的是过于复杂，世界上或许仅有数十人与之相同或类似，只能常常在角落里孤芳自赏。',
   timeline:[
@@ -540,18 +550,15 @@ var CHAR={
   ]
 };
 
-/* ═══ RENDER ═══ */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function $id(id){return document.getElementById(id);}
 
 function renderScenes(){
   var g=$id('scGrid');if(!g)return;g.innerHTML='';
-  SCENES.forEach(function(s,i){
+  SCENES.forEach(function(s,idx){
     var c=document.createElement('div');c.className='sc-card'+(s.on?' on':'');
     c.innerHTML='<span class="sc-em">'+s.em+'</span><div class="sc-t">'+esc(s.t)+'</div><div class="sc-s">'+esc(s.s)+'</div>';
-    c.addEventListener('click',function(){
-      SCENES.forEach(function(x){x.on=false;});s.on=true;renderScenes();
-    });
+    c.addEventListener('click',function(){SCENES.forEach(function(x){x.on=false;});s.on=true;renderScenes();});
     g.appendChild(c);
   });
 }
@@ -568,18 +575,13 @@ function renderXP(){
 }
 
 function toggleXP(i){
-  var x=XP_DATA[i];
-  var newOn=!x.on;
-  // group: single-select within group
-  if(x.group&&newOn){
-    XP_DATA.forEach(function(other,j){if(other.group===x.group&&j!==i)other.on=false;});
-  }
+  var x=XP_DATA[i];var newOn=!x.on;
+  if(x.group&&newOn){XP_DATA.forEach(function(o,j){if(o.group===x.group&&j!==i)o.on=false;});}
   x.on=newOn;
   renderXP();
 }
 
 function checkConflicts(){
-  // reset
   XP_DATA.forEach(function(x,i){
     var w=$id('xpw-'+i);var r=$id('xpr-'+i);
     if(w)w.textContent='';if(r)r.classList.remove('conflict-warn');
@@ -606,10 +608,8 @@ function checkConflicts(){
 function updateProtoBadges(){
   var acp=XP_DATA[8].on;var rhm=XP_DATA[9].on;var lgc=XP_DATA[10].on;
   function setBadge(id,on){
-    var b=$id(id);var p=b&&b.closest('.proto');
-    if(!b)return;
-    b.textContent=on?'ACTIVE':'STANDBY';
-    b.className='proto-badge '+(on?'active':'standby');
+    var b=$id(id);var p=b&&b.closest('.proto');if(!b)return;
+    b.textContent=on?'ACTIVE':'STANDBY';b.className='proto-badge '+(on?'active':'standby');
     if(p)p.style.borderLeftColor=on?'rgba(0,220,180,0.55)':'rgba(0,220,180,0.32)';
   }
   setBadge('badge-acp',acp);setBadge('badge-rhm',rhm);setBadge('badge-lgc',lgc);
@@ -617,7 +617,7 @@ function updateProtoBadges(){
 
 function renderSettings(){
   var sr=$id('settingRows');if(!sr)return;sr.innerHTML='';
-  SETTINGS.forEach(function(s,i){
+  SETTINGS.forEach(function(s){
     var r=document.createElement('div');r.className='s-row';
     r.innerHTML='<div class="s-row-l"><div class="s-row-t">'+esc(s.t)+'</div><div class="s-row-s">'+esc(s.s)+'</div></div><div class="sw'+(s.sw?' on':'')+'" onclick="this.classList.toggle(\'on\')"></div>';
     sr.appendChild(r);
@@ -625,9 +625,8 @@ function renderSettings(){
 }
 
 function renderChar(){
-  // Tags
-  var tc=$id('cTags');if(tc){tc.innerHTML='';CHAR.tags.forEach(function(t){var el=document.createElement('div');el.className='tag '+t[1];el.textContent=t[0];tc.appendChild(el);});}
-  // Stats
+  var tc=$id('cTags');
+  if(tc){tc.innerHTML='';CHAR.tags.forEach(function(t){var el=document.createElement('div');el.className='tag '+t[1];el.textContent=t[0];tc.appendChild(el);});}
   var sc=$id('cStats');
   if(sc){
     sc.innerHTML='';
@@ -638,9 +637,7 @@ function renderChar(){
     });
     setTimeout(function(){document.querySelectorAll('.s-fill').forEach(function(el){el.style.width=el.getAttribute('data-w');});},300);
   }
-  // Bio
   var b=$id('cBio');if(b)b.textContent=CHAR.bio;
-  // Timeline
   var tl=$id('cTimeline');
   if(tl){
     tl.innerHTML='';
@@ -653,7 +650,6 @@ function renderChar(){
   setGDisp('叶青云','male');
 }
 
-/* ═══ GENDER ═══ */
 function switchG(type){
   $id('gb-m').classList.toggle('on',type==='male');
   $id('gb-f').classList.toggle('on',type==='female');
@@ -665,13 +661,11 @@ function setGDisp(name,type){
   el.innerHTML='ACTIVE: <strong style="background:'+g+';-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">'+esc(name)+'</strong>';
 }
 
-/* ═══ MOOD ═══ */
 function updateMood(v){
   var idx=Math.round((v/100)*(MOODS.length-1));
   var el=$id('moodTxt');if(el)el.textContent=MOODS[idx];
 }
 
-/* ═══ TABS ═══ */
 document.getElementById('tabBar').addEventListener('click',function(e){
   var tab=e.target.closest('.tab');if(!tab)return;
   var p=tab.getAttribute('data-p');if(!p)return;
@@ -681,14 +675,12 @@ document.getElementById('tabBar').addEventListener('click',function(e){
   var target=$id('pg-'+p);if(target)target.classList.add('on');
 });
 
-/* ═══ THEME ═══ */
 function setTheme(m){
   document.body.classList.toggle('light',m==='light');
   $id('btn-dark').classList.toggle('on',m==='dark');
   $id('btn-light').classList.toggle('on',m==='light');
 }
 
-/* ═══ START ═══ */
 function doStart(){
   var scene=SCENES.find(function(s){return s.on;});
   var scName=scene?scene.t:'未设置';
@@ -697,52 +689,42 @@ function doStart(){
   var gender=$id('gb-m').classList.contains('on')?'叶青云（♂）':'叶清芸（♀）';
   var conflicts=[];
   CONFLICTS.forEach(function(c){if(XP_DATA[c[0]].on&&XP_DATA[c[1]].on)conflicts.push(c[2]);});
-
   var cfg=[
     '[SESSION INIT]',
     '形态：'+gender,
     '场景：'+scName,
     '情绪：'+mood,
     'XP：'+xpOn.join('、'),
-    conflicts.length?'⚠ 冲突项已确认：'+conflicts.map(function(c){return c.slice(0,12)+'…';}).join('；'):''
+    conflicts.length?'⚠ 冲突已确认：'+conflicts.map(function(c){return c.slice(0,14)+'…';}).join('；'):''
   ].filter(Boolean).join(' · ');
 
-  // Try to inject into SillyTavern input
   var inp=document.querySelector('#send_textarea')||document.querySelector('textarea[name="q"]')||document.querySelector('.qEdit textarea');
+  var note=$id('startNote');
   if(inp){
     var nativeSetter=Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value').set;
     nativeSetter.call(inp,cfg);
     inp.dispatchEvent(new Event('input',{bubbles:true}));
     inp.dispatchEvent(new Event('change',{bubbles:true}));
-    var note=$id('startNote');
     if(note){note.textContent='✓ 配置已注入输入框，确认发送即可';note.style.color='var(--c3)';}
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(cfg).then(function(){
+      if(note){note.textContent='✓ 配置已复制到剪贴板，粘贴后发送';note.style.color='var(--c3)';}
+    });
   } else {
-    // fallback: copy to clipboard
-    if(navigator.clipboard){
-      navigator.clipboard.writeText(cfg).then(function(){
-        var note=$id('startNote');
-        if(note){note.textContent='✓ 配置已复制到剪贴板，粘贴后发送';note.style.color='var(--c3)';}
-      });
-    } else {
-      var note=$id('startNote');
-      if(note){note.textContent=cfg;note.style.color='var(--c1)';}
-    }
+    if(note){note.textContent=cfg;note.style.color='var(--c1)';}
   }
   setTimeout(function(){
-    var note=$id('startNote');
-    if(note){note.textContent='完成配置后点击上方按钮 · 配置将注入叙事开场';note.style.color='';}
+    var n=$id('startNote');
+    if(n){n.textContent='完成配置后点击上方按钮 · 配置将注入叙事开场';n.style.color='';}
   },5000);
 }
 
-/* ═══ CLOCK ═══ */
 function tick(){
-  var n=new Date();
-  var el=$id('sbTime');
+  var n=new Date();var el=$id('sbTime');
   if(el)el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
 }
 setInterval(tick,10000);tick();
 
-/* ═══ INIT ═══ */
 renderScenes();
 renderXP();
 renderSettings();
