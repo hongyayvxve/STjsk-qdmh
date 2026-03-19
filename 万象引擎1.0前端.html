@@ -1,0 +1,1029 @@
+---
+
+```html
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>万象引擎</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #4a9eff;
+    --accent2: #7b4aff;
+    --text: #e0e0f0;
+    --text2: #8888aa;
+    --tag-bg: #1e1e2e;
+    --tag-active: #4a9eff22;
+    --tag-border: #2a2a4a;
+    --tag-border-active: #4a9eff;
+    --danger: #ff4a6e;
+    --success: #4aff9e;
+    --warn: #ffaa4a;
+  }
+  .light {
+    --bg: #f4f4f8;
+    --bg2: #ffffff;
+    --bg3: #eaeaf2;
+    --border: #d0d0e0;
+    --accent: #2a7adf;
+    --accent2: #5a2adf;
+    --text: #1a1a2e;
+    --text2: #6666aa;
+    --tag-bg: #f0f0f8;
+    --tag-active: #2a7adf18;
+    --tag-border: #c0c0d8;
+    --tag-border-active: #2a7adf;
+    --danger: #df2a4a;
+    --success: #2adf7a;
+    --warn: #df882a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+  .engine-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* 顶栏 */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .logo {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .logo span { color: var(--text2); }
+  .topbar-right { display: flex; gap: 8px; align-items: center; }
+  .theme-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Tab导航 */
+  .tab-nav {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px;
+  }
+  .tab-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text2);
+    border-radius: 6px;
+    padding: 6px 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .tab-btn.active {
+    background: var(--tag-active);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); background: var(--bg3); }
+
+  /* 页面内容 */
+  .page { display: none; flex-direction: column; gap: 8px; }
+  .page.active { display: flex; }
+
+  /* 卡片 */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 8px 14px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text2);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-header .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .card-body { padding: 10px 12px; }
+
+  /* 标签选择器 */
+  .tag-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    color: var(--text2);
+    border-radius: 5px;
+    padding: 4px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    position: relative;
+  }
+  .tag:hover { border-color: var(--accent); color: var(--text); }
+  .tag.selected {
+    background: var(--tag-active);
+    border-color: var(--tag-border-active);
+    color: var(--accent);
+  }
+  .tag.conflict-locked {
+    opacity: 0.35;
+    cursor: not-allowed;
+    border-color: var(--danger) !important;
+  }
+  .tag.exclusive { /* 单选组内的标签 */ }
+
+  /* 单选组 */
+  .radio-group { display: flex; flex-wrap: wrap; gap: 5px; }
+  .radio-tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    color: var(--text2);
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-tag:hover { border-color: var(--accent2); color: var(--text); }
+  .radio-tag.selected {
+    background: #7b4aff18;
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* 自定义输入 */
+  .custom-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 7px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    margin-top: 8px;
+    transition: border-color 0.2s;
+    resize: none;
+  }
+  .custom-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .custom-input::placeholder { color: var(--text2); }
+
+  /* 预设卡 */
+  .preset-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .preset-card {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .preset-card:hover { border-color: var(--accent); }
+  .preset-card.selected {
+    border-color: var(--accent);
+    background: var(--tag-active);
+  }
+  .preset-id {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .preset-name { font-size: 12px; color: var(--text); margin-bottom: 3px; font-weight: 500; }
+  .preset-tags { font-size: 10px; color: var(--text2); line-height: 1.4; }
+  .preset-scale {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .scale-r15 { background: #4aff9e22; color: var(--success); border: 1px solid #4aff9e44; }
+  .scale-r18 { background: #ffaa4a22; color: var(--warn); border: 1px solid #ffaa4a44; }
+  .scale-r18g { background: #ff4a6e22; color: var(--danger); border: 1px solid #ff4a6e44; }
+
+  /* 配置快照 */
+  .snapshot-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .snapshot-row:last-child { border-bottom: none; }
+  .snapshot-key { color: var(--text2); letter-spacing: 1px; }
+  .snapshot-val { color: var(--text); text-align: right; max-width: 60%; }
+  .snapshot-val.empty { color: var(--border); font-style: italic; }
+
+  /* 发送区 */
+  .send-area {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .send-preview {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: var(--text2);
+    min-height: 36px;
+    line-height: 1.6;
+    font-family: monospace;
+  }
+  .send-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    color: white;
+    border-radius: 7px;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: opacity 0.2s;
+  }
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:active { opacity: 0.7; }
+  .clear-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 7px;
+    padding: 7px;
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* 冲突提示 */
+  .conflict-hint {
+    font-size: 10px;
+    color: var(--danger);
+    padding: 4px 8px;
+    background: #ff4a6e11;
+    border: 1px solid #ff4a6e33;
+    border-radius: 4px;
+    display: none;
+  }
+  .conflict-hint.visible { display: block; }
+
+  /* 分隔线 */
+  .section-gap { height: 4px; }
+</style>
+</head>
+<body>
+<div class="engine-shell">
+
+  <!-- 顶栏 -->
+  <div class="topbar">
+    <div class="logo">UNIV<span>//</span>ENGINE</div>
+    <div class="topbar-right">
+      <button class="theme-btn" onclick="toggleTheme()">◑ THEME</button>
+    </div>
+  </div>
+
+  <!-- Tab导航 -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('preset')">预设</button>
+    <button class="tab-btn" onclick="switchTab('world')">世界</button>
+    <button class="tab-btn" onclick="switchTab('char')">角色</button>
+    <button class="tab-btn" onclick="switchTab('xp')">XP</button>
+    <button class="tab-btn" onclick="switchTab('review')">确认</button>
+  </div>
+
+  <!-- PAGE: 预设 -->
+  <div class="page active" id="page-preset">
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>QUICK START</div>
+      <div class="card-body">
+        <div class="preset-grid" id="preset-grid">
+          <!-- 动态生成 -->
+        </div>
+        <div class="section-gap"></div>
+        <div style="font-size:10px;color:var(--text2);margin-top:4px;">选择预设后可在各页继续叠加修改</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: 世界 -->
+  <div class="page" id="page-world">
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>交互模式</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="mode">
+          <div class="radio-tag" data-val="纯叙事">纯叙事</div>
+          <div class="radio-tag" data-val="轻RPG">轻RPG</div>
+          <div class="radio-tag" data-val="重RPG">重RPG</div>
+          <div class="radio-tag" data-val="沙盒">沙盒</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>尺度上限</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="scale">
+          <div class="radio-tag" data-val="全年龄">全年龄</div>
+          <div class="radio-tag" data-val="R15">R15</div>
+          <div class="radio-tag" data-val="R18">R18</div>
+          <div class="radio-tag" data-val="R18G">R18G</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>描写侧重</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="focus">
+          <div class="radio-tag" data-val="剧情为主">剧情为主</div>
+          <div class="radio-tag" data-val="官能为主">官能为主</div>
+          <div class="radio-tag" data-val="五五开">五五开</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>时代</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="era">
+          <div class="radio-tag" data-val="神话">神话</div>
+          <div class="radio-tag" data-val="古代东方">古代东方</div>
+          <div class="radio-tag" data-val="仙侠">仙侠</div>
+          <div class="radio-tag" data-val="中世纪">中世纪</div>
+          <div class="radio-tag" data-val="近代">近代</div>
+          <div class="radio-tag" data-val="现代">现代</div>
+          <div class="radio-tag" data-val="近未来">近未来</div>
+          <div class="radio-tag" data-val="远未来">远未来</div>
+          <div class="radio-tag" data-val="末日废土">末日废土</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>世界类型</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="worldtype">
+          <div class="radio-tag" data-val="现实">现实</div>
+          <div class="radio-tag" data-val="低魔">低魔</div>
+          <div class="radio-tag" data-val="高魔">高魔</div>
+          <div class="radio-tag" data-val="赛博朋克">赛博朋克</div>
+          <div class="radio-tag" data-val="硬科幻">硬科幻</div>
+          <div class="radio-tag" data-val="克苏鲁">克苏鲁</div>
+          <div class="radio-tag" data-val="蒸汽朋克">蒸汽朋克</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>特殊规则</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="worldrule">
+          <div class="radio-tag" data-val="无">无</div>
+          <div class="radio-tag" data-val="奴隶制">奴隶制</div>
+          <div class="radio-tag" data-val="性开放">性开放</div>
+          <div class="radio-tag" data-val="母系极端">母系极端</div>
+          <div class="radio-tag" data-val="阶级美学">阶级美学</div>
+          <div class="radio-tag" data-val="异种共存">异种共存</div>
+        </div>
+        <textarea class="custom-input" rows="2" placeholder="自定义规则补充..." id="world-custom"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: 角色 -->
+  <div class="page" id="page-char">
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>主角当前形态</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="player-gender">
+          <div class="radio-tag" data-val="叶青云（男）">叶青云·男</div>
+          <div class="radio-tag" data-val="叶清芸（女）">叶清芸·女</div>
+          <div class="radio-tag" data-val="自由切换">自由切换</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>对象气质</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="vibe">
+          <div class="radio-tag" data-val="御姐">御姐</div>
+          <div class="radio-tag" data-val="美妇">美妇</div>
+          <div class="radio-tag" data-val="少女">少女</div>
+          <div class="radio-tag" data-val="冷艳">冷艳</div>
+          <div class="radio-tag" data-val="温柔">温柔</div>
+          <div class="radio-tag" data-val="傲娇">傲娇</div>
+          <div class="radio-tag" data-val="病娇">病娇</div>
+          <div class="radio-tag" data-val="腹黑">腹黑</div>
+          <div class="radio-tag" data-val="英气">英气</div>
+          <div class="radio-tag" data-val="妖媚">妖媚</div>
+          <div class="radio-tag" data-val="人外">人外</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>对象身份</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="char-role">
+          <div class="radio-tag" data-val="宗主/领主">宗主·领主</div>
+          <div class="radio-tag" data-val="财阀高管">财阀高管</div>
+          <div class="radio-tag" data-val="同班同学">同班同学</div>
+          <div class="radio-tag" data-val="贵族">贵族</div>
+          <div class="radio-tag" data-val="妃嫔">妃嫔</div>
+          <div class="radio-tag" data-val="秘书">秘书</div>
+          <div class="radio-tag" data-val="将领">将领</div>
+          <div class="radio-tag" data-val="刺客">刺客</div>
+          <div class="radio-tag" data-val="神明">神明</div>
+          <div class="radio-tag" data-val="普通人">普通人</div>
+        </div>
+        <textarea class="custom-input" rows="2" placeholder="自定义身份..." id="char-custom"></textarea>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>关系起点</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="rel-start">
+          <div class="radio-tag" data-val="陌生">陌生</div>
+          <div class="radio-tag" data-val="旧识">旧识</div>
+          <div class="radio-tag" data-val="恋人">恋人</div>
+          <div class="radio-tag" data-val="主从·我主">主从·我主</div>
+          <div class="radio-tag" data-val="主从·她主">主从·她主</div>
+          <div class="radio-tag" data-val="敌对">敌对</div>
+          <div class="radio-tag" data-val="师生">师生</div>
+          <div class="radio-tag" data-val="上下级">上下级</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>关系走向</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="rel-end">
+          <div class="radio-tag" data-val="攻略">攻略</div>
+          <div class="radio-tag" data-val="权争">权争</div>
+          <div class="radio-tag" data-val="救赎">救赎</div>
+          <div class="radio-tag" data-val="调教">调教</div>
+          <div class="radio-tag" data-val="对抗">对抗</div>
+          <div class="radio-tag" data-val="堕落">堕落</div>
+          <div class="radio-tag" data-val="依存">依存</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>叙事风格</div>
+      <div class="card-body">
+        <div class="radio-group" data-group="narrative-tone">
+          <div class="radio-tag" data-val="轻松">轻松</div>
+          <div class="radio-tag" data-val="浪漫">浪漫</div>
+          <div class="radio-tag" data-val="紧张">紧张</div>
+          <div class="radio-tag" data-val="阴郁">阴郁</div>
+          <div class="radio-tag" data-val="史诗">史诗</div>
+          <div class="radio-tag" data-val="官能">官能</div>
+          <div class="radio-tag" data-val="恐怖">恐怖</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: XP -->
+  <div class="page" id="page-xp">
+    <div class="conflict-hint" id="conflict-hint">⚠ 部分选项存在冲突，已自动锁定</div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>感官系</div>
+      <div class="card-body">
+        <div class="tag-grid" data-xpgroup="sense">
+          <div class="tag" data-val="黑丝">黑丝</div>
+          <div class="tag" data-val="肉丝">肉丝</div>
+          <div class="tag" data-val="白丝">白丝</div>
+          <div class="tag" data-val="网袜">网袜</div>
+          <div class="tag" data-val="过膝袜">过膝袜</div>
+          <div class="tag" data-val="细跟高跟">细跟高跟</div>
+          <div class="tag" data-val="长靴">长靴</div>
+          <div class="tag" data-val="裸足">裸足</div>
+          <div class="tag" data-val="OL装">OL装</div>
+          <div class="tag" data-val="校服">校服</div>
+          <div class="tag" data-val="女仆">女仆</div>
+          <div class="tag" data-val="护士">护士</div>
+          <div class="tag" data-val="军装">军装</div>
+          <div class="tag" data-val="旗袍">旗袍</div>
+          <div class="tag" data-val="修女">修女</div>
+          <div class="tag" data-val="皮革">皮革</div>
+          <div class="tag" data-val="乳胶">乳胶</div>
+          <div class="tag" data-val="蕾丝">蕾丝</div>
+          <div class="tag" data-val="湿身">湿身</div>
+          <div class="tag" data-val="巨乳">巨乳</div>
+          <div class="tag" data-val="贫乳">贫乳</div>
+          <div class="tag" data-val="体香">体香</div>
+          <div class="tag" data-val="足控">足控</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>权力系</div>
+      <div class="card-body">
+        <div class="tag-grid" data-xpgroup="power">
+          <div class="tag" data-val="女王">女王</div>
+          <div class="tag" data-val="调教">调教</div>
+          <div class="tag" data-val="踩踏">踩踏</div>
+          <div class="tag" data-val="羞辱">羞辱</div>
+          <div class="tag" data-val="贞操管理">贞操管理</div>
+          <div class="tag" data-val="服从">服从</div>
+          <div class="tag" data-val="奴隶">奴隶</div>
+          <div class="tag" data-val="宠物化">宠物化</div>
+          <div class="tag" data-val="物化">物化</div>
+          <div class="tag" data-val="家具化">家具化</div>
+          <div class="tag" data-val="绳缚">绳缚</div>
+          <div class="tag" data-val="锁链">锁链</div>
+          <div class="tag" data-val="口球">口球</div>
+          <div class="tag" data-val="鞭打">鞭打</div>
+          <div class="tag" data-val="蜡烛">蜡烛</div>
+          <div class="tag" data-val="窒息">窒息</div>
+          <div class="tag" data-val="禁止高潮">禁止高潮</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>情境系</div>
+      <div class="card-body">
+        <div class="tag-grid" data-xpgroup="scene">
+          <div class="tag" data-val="纯爱" data-conflicts="NTR,强制,胁迫">纯爱</div>
+          <div class="tag" data-val="NTR" data-conflicts="纯爱">NTR</div>
+          <div class="tag" data-val="后宫">后宫</div>
+          <div class="tag" data-val="偷窥">偷窥</div>
+          <div class="tag" data-val="自愿" data-conflicts="强制,胁迫">自愿</div>
+          <div class="tag" data-val="半推半就">半推半就</div>
+          <div class="tag" data-val="强制" data-conflicts="纯爱,自愿">强制</div>
+          <div class="tag" data-val="催眠">催眠</div>
+          <div class="tag" data-val="胁迫" data-conflicts="纯爱,自愿">胁迫</div>
+          <div class="tag" data-val="公开露出">公开露出</div>
+          <div class="tag" data-val="电车">电车</div>
+          <div class="tag" data-val="密室">密室</div>
+          <div class="tag" data-val="户外">户外</div>
+          <div class="tag" data-val="师生">师生</div>
+          <div class="tag" data-val="年龄差">年龄差</div>
+          <div class="tag" data-val="近亲">近亲</div>
+          <div class="tag" data-val="人外">人外</div>
+          <div class="tag" data-val="阶级差">阶级差</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>身体系</div>
+      <div class="card-body">
+        <div class="tag-grid" data-xpgroup="body">
+          <div class="tag" data-val="性转">性转</div>
+          <div class="tag" data-val="触手">触手</div>
+          <div class="tag" data-val="兽人">兽人</div>
+          <div class="tag" data-val="怀孕">怀孕</div>
+          <div class="tag" data-val="产卵">产卵</div>
+          <div class="tag" data-val="身体改造">身体改造</div>
+          <div class="tag" data-val="烙印">烙印</div>
+          <div class="tag" data-val="肉铠">肉铠</div>
+          <div class="tag" data-val="共生寄生">共生寄生</div>
+          <div class="tag" data-val="子宫奸">子宫奸</div>
+          <div class="tag" data-val="器官改造">器官改造</div>
+          <div class="tag" data-val="神经改造">神经改造</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>心理系</div>
+      <div class="card-body">
+        <div class="tag-grid" data-xpgroup="mind">
+          <div class="tag" data-val="催眠控制">催眠控制</div>
+          <div class="tag" data-val="洗脑">洗脑</div>
+          <div class="tag" data-val="清纯堕落">清纯堕落</div>
+          <div class="tag" data-val="贵族堕落">贵族堕落</div>
+          <div class="tag" data-val="英雄堕落">英雄堕落</div>
+          <div class="tag" data-val="病态执念">病态执念</div>
+          <div class="tag" data-val="依赖共生">依赖共生</div>
+          <div class="tag" data-val="斯德哥尔摩">斯德哥尔摩</div>
+          <div class="tag" data-val="认知重写">认知重写</div>
+          <div class="tag" data-val="空白期">空白期</div>
+          <div class="tag" data-val="三重压迫">三重压迫</div>
+        </div>
+        <textarea class="custom-input" rows="2" placeholder="自定义XP补充..." id="xp-custom"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE: 确认 -->
+  <div class="page" id="page-review">
+    <div class="card">
+      <div class="card-header"><div class="dot"></div>当前配置快照</div>
+      <div class="card-body" id="snapshot-body">
+        <!-- 动态生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 发送区（常驻） -->
+  <div class="send-area">
+    <div class="send-preview" id="send-preview">尚未选择任何配置</div>
+    <button class="send-btn" onclick="sendConfig()">▶ 开始生成</button>
+    <button class="clear-btn" onclick="clearAll()">↺ 清空重选</button>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════
+// 状态存储
+// ═══════════════════════════════
+const state = {
+  preset: null,
+  mode: null,
+  scale: null,
+  focus: null,
+  era: null,
+  worldtype: null,
+  worldrule: null,
+  'player-gender': null,
+  vibe: null,
+  'char-role': null,
+  'rel-start': null,
+  'rel-end': null,
+  'narrative-tone': null,
+  xp: new Set(),
+  'world-custom': '',
+  'char-custom': '',
+  'xp-custom': ''
+};
+
+// ═══════════════════════════════
+// 预设数据
+// ═══════════════════════════════
+const presets = [
+  { id:'P1', name:'仙侠遭遇', tags:'宗门高魔·御姐宗主·年龄差·丝袜', scale:'R18',
+    config:{ mode:'轻RPG', scale:'R18', focus:'五五开', era:'仙侠', worldtype:'高魔', vibe:'御姐', 'rel-start':'主从·她主', xp:['年龄差','黑丝','细跟高跟'] }},
+  { id:'P2', name:'赛博暗影', tags:'2087霓虹·财阀高管·义体改造·权谋', scale:'R18',
+    config:{ mode:'重RPG', scale:'R18', focus:'剧情为主', era:'近未来', worldtype:'赛博朋克', vibe:'冷艳', 'char-role':'财阀高管', 'rel-start':'敌对', xp:['身体改造'] }},
+  { id:'P3', name:'校园温情', tags:'现代·同班同学·纯爱·轻RPG', scale:'R15',
+    config:{ mode:'轻RPG', scale:'R15', focus:'剧情为主', era:'现代', worldtype:'现实', vibe:'温柔', 'char-role':'同班同学', 'rel-start':'陌生', xp:['纯爱'] }},
+  { id:'P4', name:'黑暗征服', tags:'中世纪高魔·被俘贵族·调教·史诗', scale:'R18G',
+    config:{ mode:'重RPG', scale:'R18G', focus:'官能为主', era:'中世纪', worldtype:'高魔', vibe:'傲娇', 'char-role':'贵族', 'rel-start':'敌对', 'narrative-tone':'史诗', xp:['调教','强制','绳缚'] }},
+  { id:'P5', name:'都市怪谈', tags:'低魔现代·克苏鲁暗流·理智值', scale:'R15',
+    config:{ mode:'轻RPG', scale:'R15', focus:'剧情为主', era:'现代', worldtype:'克苏鲁', 'rel-start':'陌生', 'narrative-tone':'恐怖', xp:['催眠'] }},
+  { id:'P6', name:'末日信任', tags:'废土第47年·女将·信任博弈·慢热', scale:'R18',
+    config:{ mode:'重RPG', scale:'R18', focus:'剧情为主', era:'末日废土', worldtype:'现实', vibe:'英气', 'char-role':'将领', 'rel-start':'敌对', xp:[] }},
+  { id:'P7', name:'宫廷权谋', tags:'古代东方·后宫博弈·腹黑妃嫔', scale:'R18',
+    config:{ mode:'纯叙事', scale:'R18', focus:'剧情为主', era:'古代东方', worldtype:'低魔', vibe:'腹黑', 'char-role':'妃嫔', 'narrative-tone':'紧张', xp:['阶级差'] }},
+  { id:'P8', name:'纯感官', tags:'自定义组合·官能为主·任意追加', scale:'R18',
+    config:{ mode:'纯叙事', scale:'R18', focus:'官能为主', xp:[] }}
+];
+
+// 冲突规则（双向）
+const conflictMap = {
+  '纯爱': ['NTR','强制','胁迫'],
+  'NTR': ['纯爱'],
+  '自愿': ['强制','胁迫'],
+  '强制': ['纯爱','自愿'],
+  '胁迫': ['纯爱','自愿'],
+};
+
+// ═══════════════════════════════
+// 初始化预设卡
+// ═══════════════════════════════
+function initPresets() {
+  const grid = document.getElementById('preset-grid');
+  presets.forEach(p => {
+    const scaleClass = p.scale === 'R15' ? 'scale-r15' : p.scale === 'R18G' ? 'scale-r18g' : 'scale-r18';
+    const card = document.createElement('div');
+    card.className = 'preset-card';
+    card.dataset.id = p.id;
+    card.innerHTML = `
+      <div class="preset-id">${p.id}</div>
+      <div class="preset-name">${p.name}</div>
+      <div class="preset-tags">${p.tags}</div>
+      <span class="preset-scale ${scaleClass}">${p.scale}</span>
+    `;
+    card.onclick = () => applyPreset(p.id);
+    grid.appendChild(card);
+  });
+}
+
+function applyPreset(id) {
+  const p = presets.find(x => x.id === id);
+  if (!p) return;
+  // 清空
+  state.xp.clear();
+  // 应用
+  state.preset = id;
+  Object.entries(p.config).forEach(([k, v]) => {
+    if (k === 'xp') { v.forEach(x => state.xp.add(x)); }
+    else { state[k] = v; }
+  });
+  // 更新所有UI
+  refreshAllSelections();
+  updatePreview();
+  // 高亮预设卡
+  document.querySelectorAll('.preset-card').forEach(c => {
+    c.classList.toggle('selected', c.dataset.id === id);
+  });
+}
+
+// ═══════════════════════════════
+// Tab切换
+// ═══════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const tabs = ['preset','world','char','xp','review'];
+    b.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (name === 'review') renderSnapshot();
+}
+
+// ═══════════════════════════════
+// 单选组
+// ═══════════════════════════════
+function initRadioGroups() {
+  document.querySelectorAll('.radio-group[data-group]').forEach(group => {
+    const key = group.dataset.group;
+    group.querySelectorAll('.radio-tag').forEach(tag => {
+      tag.onclick = () => {
+        const val = tag.dataset.val;
+        if (state[key] === val) {
+          state[key] = null;
+          tag.classList.remove('selected');
+        } else {
+          state[key] = val;
+          group.querySelectorAll('.radio-tag').forEach(t => t.classList.remove('selected'));
+          tag.classList.add('selected');
+        }
+        state.preset = null;
+        document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+        updatePreview();
+      };
+    });
+  });
+}
+
+// ═══════════════════════════════
+// XP多选 + 冲突检测
+// ═══════════════════════════════
+function initXPTags() {
+  document.querySelectorAll('.tag-grid .tag').forEach(tag => {
+    tag.onclick = () => {
+      if (tag.classList.contains('conflict-locked')) return;
+      const val = tag.dataset.val;
+      if (state.xp.has(val)) {
+        state.xp.delete(val);
+        tag.classList.remove('selected');
+      } else {
+        state.xp.add(val);
+        tag.classList.add('selected');
+      }
+      applyConflicts();
+      updatePreview();
+    };
+  });
+}
+
+function applyConflicts() {
+  let hasConflict = false;
+  // 收集所有当前激活的冲突目标
+  const locked = new Set();
+  state.xp.forEach(val => {
+    const conflicts = conflictMap[val] || [];
+    conflicts.forEach(c => locked.add(c));
+  });
+  document.querySelectorAll('.tag-grid .tag').forEach(tag => {
+    const val = tag.dataset.val;
+    if (locked.has(val) && !state.xp.has(val)) {
+      tag.classList.add('conflict-locked');
+      hasConflict = true;
+    } else {
+      tag.classList.remove('conflict-locked');
+    }
+  });
+  const hint = document.getElementById('conflict-hint');
+  hint.classList.toggle('visible', hasConflict);
+}
+
+// ═══════════════════════════════
+// 自定义输入
+// ═══════════════════════════════
+function initCustomInputs() {
+  ['world-custom','char-custom','xp-custom'].forEach(id => {
+    const el = document.getElementById(id);
+    el.oninput = () => {
+      state[id] = el.value;
+      updatePreview();
+    };
+  });
+}
+
+// ═══════════════════════════════
+// 刷新全部UI选中状态
+// ═══════════════════════════════
+function refreshAllSelections() {
+  // 单选组
+  document.querySelectorAll('.radio-group[data-group]').forEach(group => {
+    const key = group.dataset.group;
+    group.querySelectorAll('.radio-tag').forEach(tag => {
+      tag.classList.toggle('selected', state[key] === tag.dataset.val);
+    });
+  });
+  // XP多选
+  document.querySelectorAll('.tag-grid .tag').forEach(tag => {
+    tag.classList.toggle('selected', state.xp.has(tag.dataset.val));
+    tag.classList.remove('conflict-locked');
+  });
+  applyConflicts();
+  // 自定义输入
+  ['world-custom','char-custom','xp-custom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = state[id] || '';
+  });
+}
+
+// ═══════════════════════════════
+// 生成配置字符串
+// ═══════════════════════════════
+function buildConfigString() {
+  const parts = [];
+  if (state.preset) parts.push(state.preset);
+  const keyLabels = [
+    ['mode','模式'],['scale','尺度'],['focus','侧重'],
+    ['era','时代'],['worldtype','类型'],['worldrule','规则'],
+    ['player-gender','主角'],['vibe','气质'],['char-role','对象身份'],
+    ['rel-start','关系起点'],['rel-end','关系走向'],['narrative-tone','基调']
+  ];
+  keyLabels.forEach(([k, label]) => {
+    if (state[k]) parts.push(`${label}:${state[k]}`);
+  });
+  if (state.xp.size > 0) parts.push('XP:' + [...state.xp].join('·'));
+  const customs = [state['world-custom'],state['char-custom'],state['xp-custom']].filter(Boolean);
+  if (customs.length) parts.push('补充:' + customs.join('；'));
+  return parts.join(' / ');
+}
+
+// ═══════════════════════════════
+// 更新预览
+// ═══════════════════════════════
+function updatePreview() {
+  const str = buildConfigString();
+  const preview = document.getElementById('send-preview');
+  preview.textContent = str || '尚未选择任何配置';
+}
+
+// ═══════════════════════════════
+// 渲染配置快照
+// ═══════════════════════════════
+function renderSnapshot() {
+  const body = document.getElementById('snapshot-body');
+  const rows = [
+    ['预设', state.preset],
+    ['交互模式', state.mode],
+    ['尺度', state.scale],
+    ['描写侧重', state.focus],
+    ['时代', state.era],
+    ['世界类型', state.worldtype],
+    ['特殊规则', state.worldrule],
+    ['主角形态', state['player-gender']],
+    ['对象气质', state.vibe],
+    ['对象身份', state['char-role']],
+    ['关系起点', state['rel-start']],
+    ['关系走向', state['rel-end']],
+    ['叙事基调', state['narrative-tone']],
+    ['XP', state.xp.size > 0 ? [...state.xp].join('·') : null],
+    ['自定义补充', [state['world-custom'],state['char-custom'],state['xp-custom']].filter(Boolean).join('；') || null]
+  ];
+  body.innerHTML = rows.map(([k, v]) => `
+    <div class="snapshot-row">
+      <span class="snapshot-key">${k}</span>
+      <span class="snapshot-val ${v ? '' : 'empty'}">${v || '—'}</span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════
+// 发送
+// ═══════════════════════════════
+function sendConfig() {
+  const str = buildConfigString();
+  if (!str) return;
+  // SillyTavern注入：找到输入框并触发发送
+  const input = document.querySelector('#send_textarea') ||
+                document.querySelector('textarea[placeholder]') ||
+                document.querySelector('#chat-input') ||
+                document.querySelector('.chat-input textarea');
+  if (input) {
+    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+    nativeSetter.call(input, str);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    setTimeout(() => {
+      const sendBtn = document.querySelector('#send_but') ||
+                      document.querySelector('[id*="send"]') ||
+                      document.querySelector('button[type="submit"]');
+      if (sendBtn) sendBtn.click();
+    }, 100);
+  } else {
+    // 降级：复制到剪贴板
+    navigator.clipboard.writeText(str).then(() => {
+      alert('配置已复制到剪贴板，请粘贴后发送：\n\n' + str);
+    });
+  }
+}
+
+// ═══════════════════════════════
+// 清空
+// ═══════════════════════════════
+function clearAll() {
+  Object.keys(state).forEach(k => {
+    if (k === 'xp') state.xp.clear();
+    else state[k] = null;
+  });
+  state['world-custom'] = '';
+  state['char-custom'] = '';
+  state['xp-custom'] = '';
+  refreshAllSelections();
+  document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
+  updatePreview();
+}
+
+// ═══════════════════════════════
+// 主题切换
+// ═══════════════════════════════
+function toggleTheme() {
+  document.body.classList.toggle('light');
+}
+
+// ═══════════════════════════════
+// 初始化
+// ═══════════════════════════════
+initPresets();
+initRadioGroups();
+initXPTags();
+initCustomInputs();
+</script>
+</body>
+</html>
+```
+
+---
