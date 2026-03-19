@@ -1,1029 +1,753 @@
----
-
 ```html
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>万象引擎</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>A.U.T.O. SESSION INIT</title>
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --bg2: #111118;
-    --bg3: #1a1a24;
-    --border: #2a2a3a;
-    --accent: #4a9eff;
-    --accent2: #7b4aff;
-    --text: #e0e0f0;
-    --text2: #8888aa;
-    --tag-bg: #1e1e2e;
-    --tag-active: #4a9eff22;
-    --tag-border: #2a2a4a;
-    --tag-border-active: #4a9eff;
-    --danger: #ff4a6e;
-    --success: #4aff9e;
-    --warn: #ffaa4a;
-  }
-  .light {
-    --bg: #f4f4f8;
-    --bg2: #ffffff;
-    --bg3: #eaeaf2;
-    --border: #d0d0e0;
-    --accent: #2a7adf;
-    --accent2: #5a2adf;
-    --text: #1a1a2e;
-    --text2: #6666aa;
-    --tag-bg: #f0f0f8;
-    --tag-active: #2a7adf18;
-    --tag-border: #c0c0d8;
-    --tag-border-active: #2a7adf;
-    --danger: #df2a4a;
-    --success: #2adf7a;
-    --warn: #df882a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'SF Pro Display', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    font-size: 13px;
-    min-height: 100vh;
-    transition: background 0.3s, color 0.3s;
-  }
-  .engine-shell {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+:root{
+  --bg:#0a0f1a;--bg1:#0d1420;--bg2:#111a2a;
+  --c1:#00c8ff;--c2:#0066aa;--c3:#00ffcc;--c4:#ff6b35;
+  --border0:rgba(0,180,220,0.10);--border1:rgba(0,180,220,0.24);--border2:rgba(0,220,255,0.55);
+  --text0:rgba(165,225,255,0.92);--text1:rgba(105,185,225,0.70);--text2:rgba(65,145,185,0.50);
+  --panel:rgba(8,18,36,0.96);
+  --glow:0 0 14px rgba(0,200,255,0.22);
+  --tab-h:54px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+body.light{
+  --bg:#ccd8e8;--bg1:#d4dff0;--bg2:#c0cede;
+  --c1:#005580;--c2:#0077aa;--c3:#006644;--c4:#cc4400;
+  --border0:rgba(0,80,130,0.12);--border1:rgba(0,80,130,0.26);--border2:rgba(0,100,155,0.52);
+  --text0:rgba(4,40,76,0.92);--text1:rgba(8,55,95,0.70);--text2:rgba(18,65,105,0.52);
+  --panel:rgba(210,228,248,0.96);
+  --glow:0 0 10px rgba(0,80,130,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Courier New',Consolas,monospace;}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,rgba(0,180,255,0.018) 0,rgba(0,180,255,0.018) 1px,transparent 1px,transparent 4px);
+}
 
-  /* 顶栏 */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-  }
-  .logo {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: var(--accent);
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-  .logo span { color: var(--text2); }
-  .topbar-right { display: flex; gap: 8px; align-items: center; }
-  .theme-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 1px;
-  }
-  .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+/* LAYOUT */
+.shell{position:relative;z-index:1;width:100%;height:100%;display:flex;flex-direction:column;}
 
-  /* Tab导航 */
-  .tab-nav {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 6px;
-  }
-  .tab-btn {
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--text2);
-    border-radius: 6px;
-    padding: 6px 4px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-    letter-spacing: 0.5px;
-  }
-  .tab-btn.active {
-    background: var(--tag-active);
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .tab-btn:hover:not(.active) { color: var(--text); background: var(--bg3); }
+/* STATUS */
+.sb{
+  flex-shrink:0;padding:calc(6px + var(--safe-t)) 16px 6px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(4,10,22,0.92);border-bottom:1px solid var(--border1);backdrop-filter:blur(8px);
+}
+body.light .sb{background:rgba(195,218,240,0.92);}
+.sb-side{font-size:10px;color:var(--text2);letter-spacing:1px;}
+.sb-mid{font-size:10px;letter-spacing:2.5px;color:var(--c1);display:flex;align-items:center;gap:6px;text-transform:uppercase;}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--c3);box-shadow:0 0 5px var(--c3);animation:bk 2s ease-in-out infinite;}
+@keyframes bk{0%,100%{opacity:.18}50%{opacity:1}}
 
-  /* 页面内容 */
-  .page { display: none; flex-direction: column; gap: 8px; }
-  .page.active { display: flex; }
+/* PAGES */
+.pages{flex:1;position:relative;overflow:hidden;}
+.page{
+  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(0,180,220,0.10) transparent;
+  padding-bottom:calc(var(--tab-h) + var(--safe-b) + 8px);
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity .2s,transform .2s;
+}
+.page::-webkit-scrollbar{width:2px;}
+.page::-webkit-scrollbar-thumb{background:rgba(0,180,220,0.10);}
+.page.on{opacity:1;pointer-events:auto;transform:translateY(0);}
 
-  /* 卡片 */
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 8px 14px;
-    background: var(--bg3);
-    border-bottom: 1px solid var(--border);
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--text2);
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .card-header .dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-  .card-body { padding: 10px 12px; }
+/* TABS */
+.tabs{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  height:calc(var(--tab-h) + var(--safe-b));padding-bottom:var(--safe-b);
+  display:flex;background:rgba(4,10,22,0.97);border-top:1px solid var(--border1);backdrop-filter:blur(14px);
+}
+body.light .tabs{background:rgba(200,222,244,0.97);}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  cursor:pointer;position:relative;user-select:none;
+}
+.tab::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:linear-gradient(90deg,transparent,var(--c1),var(--c3),transparent);transition:width .24s;box-shadow:0 0 5px var(--c1);}
+.tab.on::after{width:52%;}
+.t-ico{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:5px;transition:all .2s;}
+.tab.on .t-ico{background:rgba(0,180,220,0.10);border:1px solid var(--border1);box-shadow:var(--glow);}
+.t-ico svg{width:17px;height:17px;}
+.tab svg path,.tab svg circle,.tab svg polygon,.tab svg rect,.tab svg polyline,.tab svg line{stroke:var(--text2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s;}
+.tab.on svg path,.tab.on svg circle,.tab.on svg polygon,.tab.on svg rect,.tab.on svg polyline,.tab.on svg line{stroke:var(--c1);}
+.t-lbl{font-size:9px;color:var(--text2);letter-spacing:1.2px;text-transform:uppercase;transition:color .2s;}
+.tab.on .t-lbl{color:var(--c1);}
 
-  /* 标签选择器 */
-  .tag-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-  .tag {
-    background: var(--tag-bg);
-    border: 1px solid var(--tag-border);
-    color: var(--text2);
-    border-radius: 5px;
-    padding: 4px 8px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-    position: relative;
-  }
-  .tag:hover { border-color: var(--accent); color: var(--text); }
-  .tag.selected {
-    background: var(--tag-active);
-    border-color: var(--tag-border-active);
-    color: var(--accent);
-  }
-  .tag.conflict-locked {
-    opacity: 0.35;
-    cursor: not-allowed;
-    border-color: var(--danger) !important;
-  }
-  .tag.exclusive { /* 单选组内的标签 */ }
+/* COMMON */
+.ph{padding:16px 16px 12px;border-bottom:1px solid var(--border0);background:linear-gradient(150deg,rgba(0,55,100,0.14),transparent 70%);}
+.ph-tag{font-size:9px;letter-spacing:2.2px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:5px;}
+.ph-tag::before{content:'◈';color:var(--c1);opacity:.55;font-size:8px;}
+.ph-ttl{font-size:18px;font-weight:700;letter-spacing:2.5px;color:var(--c1);text-shadow:var(--glow);}
+.ph-sub{font-size:11px;color:var(--text1);margin-top:4px;line-height:1.65;letter-spacing:.38px;}
 
-  /* 单选组 */
-  .radio-group { display: flex; flex-wrap: wrap; gap: 5px; }
-  .radio-tag {
-    background: var(--tag-bg);
-    border: 1px solid var(--tag-border);
-    color: var(--text2);
-    border-radius: 5px;
-    padding: 4px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-  }
-  .radio-tag:hover { border-color: var(--accent2); color: var(--text); }
-  .radio-tag.selected {
-    background: #7b4aff18;
-    border-color: var(--accent2);
-    color: var(--accent2);
-  }
+.blk{padding:14px 16px;}
+.blk+.blk{padding-top:0;}
+.sec{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--c1);opacity:.78;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sec::before{content:'▶';font-size:6px;opacity:.65;}
+.sec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border1),transparent);}
+.hdiv{height:1px;margin:0 16px;background:linear-gradient(90deg,transparent,var(--border1) 30%,var(--border1) 70%,transparent);}
 
-  /* 自定义输入 */
-  .custom-input {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 7px 10px;
-    font-size: 12px;
-    font-family: inherit;
-    margin-top: 8px;
-    transition: border-color 0.2s;
-    resize: none;
-  }
-  .custom-input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .custom-input::placeholder { color: var(--text2); }
+.card{background:rgba(0,18,42,0.55);border:1px solid var(--border0);border-left:2px solid rgba(0,180,220,0.25);border-radius:4px;padding:13px;}
+body.light .card{background:rgba(190,215,240,0.45);}
 
-  /* 预设卡 */
-  .preset-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-  .preset-card {
-    background: var(--tag-bg);
-    border: 1px solid var(--tag-border);
-    border-radius: 8px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .preset-card:hover { border-color: var(--accent); }
-  .preset-card.selected {
-    border-color: var(--accent);
-    background: var(--tag-active);
-  }
-  .preset-id {
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 2px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .preset-name { font-size: 12px; color: var(--text); margin-bottom: 3px; font-weight: 500; }
-  .preset-tags { font-size: 10px; color: var(--text2); line-height: 1.4; }
-  .preset-scale {
-    display: inline-block;
-    margin-top: 4px;
-    font-size: 9px;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-weight: 600;
-    letter-spacing: 1px;
-  }
-  .scale-r15 { background: #4aff9e22; color: var(--success); border: 1px solid #4aff9e44; }
-  .scale-r18 { background: #ffaa4a22; color: var(--warn); border: 1px solid #ffaa4a44; }
-  .scale-r18g { background: #ff4a6e22; color: var(--danger); border: 1px solid #ff4a6e44; }
+/* XP ITEMS */
+.xp-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border0);}
+.xp-row:last-child{border-bottom:none;}
+.xp-ico{font-size:14px;width:22px;text-align:center;flex-shrink:0;}
+.xp-body{flex:1;}
+.xp-lbl{font-size:12px;color:var(--text0);letter-spacing:.5px;}
+.xp-sub{font-size:10px;color:var(--text2);margin-top:2px;letter-spacing:.3px;line-height:1.55;}
+.xp-warn{font-size:9px;color:var(--c4);margin-top:3px;letter-spacing:.4px;display:none;}
+.xp-row.conflict-warn .xp-warn{display:block;}
 
-  /* 配置快照 */
-  .snapshot-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 11px;
-  }
-  .snapshot-row:last-child { border-bottom: none; }
-  .snapshot-key { color: var(--text2); letter-spacing: 1px; }
-  .snapshot-val { color: var(--text); text-align: right; max-width: 60%; }
-  .snapshot-val.empty { color: var(--border); font-style: italic; }
+/* SWITCH */
+.sw{width:40px;height:22px;flex-shrink:0;background:rgba(0,80,120,0.18);border:1px solid var(--border1);border-radius:3px;cursor:pointer;position:relative;transition:all .28s;}
+.sw::after{content:'';position:absolute;top:4px;left:4px;width:12px;height:12px;border-radius:2px;background:rgba(0,160,200,0.28);transition:all .28s cubic-bezier(.34,1.56,.64,1);}
+.sw.on{background:rgba(0,130,180,0.18);border-color:var(--c1);box-shadow:0 0 7px rgba(0,180,220,0.20);}
+.sw.on::after{left:22px;background:linear-gradient(135deg,var(--c2),var(--c1));box-shadow:0 0 5px rgba(0,200,255,0.45);}
+.sw.disabled{opacity:.32;cursor:not-allowed;}
 
-  /* 发送区 */
-  .send-area {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .send-preview {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 10px;
-    font-size: 11px;
-    color: var(--text2);
-    min-height: 36px;
-    line-height: 1.6;
-    font-family: monospace;
-  }
-  .send-btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    color: white;
-    border-radius: 7px;
-    padding: 10px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: 2px;
-    transition: opacity 0.2s;
-  }
-  .send-btn:hover { opacity: 0.85; }
-  .send-btn:active { opacity: 0.7; }
-  .clear-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text2);
-    border-radius: 7px;
-    padding: 7px;
-    font-size: 11px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.2s;
-  }
-  .clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+/* SCENE GRID */
+.sc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sc-card{background:rgba(0,16,40,0.52);border:1px solid var(--border0);border-top:2px solid transparent;border-radius:4px;padding:13px 11px;cursor:pointer;transition:all .22s;}
+body.light .sc-card{background:rgba(190,215,240,0.40);}
+.sc-card.on{background:rgba(0,65,115,0.28);border-color:var(--border2);border-top-color:var(--c1);box-shadow:var(--glow);}
+.sc-em{font-size:18px;margin-bottom:5px;display:block;}
+.sc-t{font-size:12px;font-weight:700;color:var(--text0);margin-bottom:2px;letter-spacing:.8px;}
+.sc-s{font-size:10px;color:var(--text2);letter-spacing:.4px;}
 
-  /* 冲突提示 */
-  .conflict-hint {
-    font-size: 10px;
-    color: var(--danger);
-    padding: 4px 8px;
-    background: #ff4a6e11;
-    border: 1px solid #ff4a6e33;
-    border-radius: 4px;
-    display: none;
-  }
-  .conflict-hint.visible { display: block; }
+/* MOOD */
+.mood-box{background:rgba(0,14,34,0.46);border:1px solid var(--border0);border-radius:4px;padding:13px;}
+body.light .mood-box{background:rgba(190,215,240,0.38);}
+.mood-sl{-webkit-appearance:none;appearance:none;width:100%;height:4px;outline:none;cursor:pointer;margin:10px 0 6px;background:linear-gradient(90deg,rgba(0,70,130,0.35),rgba(0,200,255,0.30));border-radius:2px;}
+.mood-sl::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--c1);cursor:pointer;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);box-shadow:0 0 9px rgba(0,200,255,0.50);}
+.mood-ends{display:flex;justify-content:space-between;}
+.mood-end{font-size:9px;color:var(--text2);letter-spacing:.4px;}
+.mood-val{text-align:center;margin-top:6px;font-size:12px;font-weight:700;color:var(--c1);letter-spacing:2.5px;text-transform:uppercase;}
 
-  /* 分隔线 */
-  .section-gap { height: 4px; }
+/* PROTO CARDS */
+.proto{background:rgba(0,14,36,0.52);border:1px solid var(--border0);border-left:2px solid rgba(0,220,180,0.32);border-radius:4px;padding:13px;margin-bottom:8px;}
+body.light .proto{background:rgba(190,215,240,0.42);}
+.proto:last-child{margin-bottom:0;}
+.proto-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.proto-name{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--c3);text-transform:uppercase;}
+.proto-badge{font-size:8px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;}
+.proto-badge.active{background:rgba(0,220,180,0.10);border:1px solid rgba(0,220,180,0.28);color:var(--c3);}
+.proto-badge.standby{background:rgba(65,145,185,0.08);border:1px solid var(--border0);color:var(--text2);}
+.proto-desc{font-size:11px;color:var(--text1);line-height:1.70;letter-spacing:.35px;}
+.proto-rules{margin-top:8px;}
+.proto-rule{font-size:10px;color:var(--text2);line-height:1.60;letter-spacing:.3px;padding:4px 0;border-top:1px solid var(--border0);}
+.proto-rule:first-child{border-top:none;}
+.proto-rule strong{color:var(--c1);}
+
+/* DATA GRID */
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.dc{background:rgba(0,12,32,0.46);border:1px solid var(--border0);border-radius:4px;padding:10px 12px;}
+body.light .dc{background:rgba(190,215,240,0.40);}
+.dc-l{font-size:8px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:4px;}
+.dc-v{font-size:14px;font-weight:700;color:var(--c1);letter-spacing:.8px;}
+.dc-s{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:.3px;}
+
+/* CHAR */
+.cid{margin:14px 16px 0;padding:16px;background:rgba(0,14,38,0.65);border:1px solid var(--border1);border-top:2px solid var(--c1);border-radius:4px;display:flex;gap:13px;align-items:flex-start;}
+body.light .cid{background:rgba(190,215,240,0.65);}
+.cid-orb{width:54px;height:54px;border-radius:6px;flex-shrink:0;background:rgba(0,50,105,0.55);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:var(--glow);}
+.cid-id{font-size:9px;letter-spacing:2px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;}
+.cid-name{font-size:17px;font-weight:700;letter-spacing:2.5px;color:var(--c1);text-shadow:var(--glow);}
+.cid-alias{font-size:11px;color:var(--text1);margin-top:4px;letter-spacing:.5px;}
+
+.g-wrap{background:rgba(0,10,28,0.50);border:1px solid var(--border0);border-radius:4px;padding:13px;}
+body.light .g-wrap{background:rgba(190,215,240,0.40);}
+.g-row{display:flex;gap:6px;background:rgba(0,0,0,0.28);padding:5px;border-radius:3px;}
+body.light .g-row{background:rgba(165,195,225,0.38);}
+.g-btn{flex:1;padding:10px;border:none;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:1.8px;transition:all .28s cubic-bezier(.34,1.56,.64,1);}
+.g-btn.male{background:transparent;color:rgba(80,130,220,0.36);}
+.g-btn.male.on{background:linear-gradient(135deg,rgba(18,52,175,0.44),rgba(48,98,218,0.34));color:#88aaff;border:1px solid rgba(78,122,218,0.44);box-shadow:0 0 14px rgba(48,98,220,0.24);}
+.g-btn.female{background:transparent;color:rgba(180,55,120,0.36);}
+.g-btn.female.on{background:linear-gradient(135deg,rgba(148,18,74,0.34),rgba(198,50,118,0.28));color:#ff90c0;border:1px solid rgba(198,74,133,0.40);box-shadow:0 0 14px rgba(198,50,118,0.22);}
+.g-disp{text-align:center;margin-top:10px;font-size:11px;color:var(--text2);letter-spacing:1.2px;}
+.g-disp strong{font-size:15px;font-weight:700;margin-left:6px;letter-spacing:2px;}
+
+.tag-cloud{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{padding:4px 10px;border-radius:3px;font-size:10px;font-weight:600;letter-spacing:.7px;}
+.tc1{background:rgba(0,180,220,.09);border:1px solid rgba(0,180,220,.26);color:var(--c1);}
+.tc2{background:rgba(0,255,180,.07);border:1px solid rgba(0,255,180,.20);color:var(--c3);}
+.tc3{background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.22);color:var(--c4);}
+.tc4{background:rgba(150,60,255,.09);border:1px solid rgba(150,60,255,.26);color:#bb88ff;}
+
+.stat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.stat-row:last-child{margin-bottom:0;}
+.s-lbl{font-size:9px;color:var(--text2);width:46px;flex-shrink:0;letter-spacing:1px;text-transform:uppercase;}
+.s-track{flex:1;height:5px;background:rgba(0,80,120,0.14);position:relative;overflow:hidden;}
+.s-track::before{content:'';position:absolute;inset:0;z-index:1;background:repeating-linear-gradient(90deg,transparent 0,transparent 6px,rgba(0,0,0,.20) 6px,rgba(0,0,0,.20) 7px);}
+.s-fill{height:100%;z-index:0;position:relative;transition:width 1.5s cubic-bezier(.22,1,.36,1);}
+.s-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.40),transparent);animation:shim 2.8s ease-in-out infinite;}
+@keyframes shim{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+.s-val{font-size:10px;color:var(--c1);width:30px;text-align:right;flex-shrink:0;font-weight:700;letter-spacing:.7px;}
+
+.bio-txt{font-size:12px;color:var(--text1);line-height:1.78;letter-spacing:.38px;}
+
+.tl-item{display:flex;gap:12px;margin-bottom:13px;}
+.tl-item:last-child{margin-bottom:0;}
+.tl-l{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.tl-dot{width:8px;height:8px;border-radius:50%;background:var(--c1);box-shadow:0 0 6px var(--c1);}
+.tl-stem{flex:1;width:1px;background:linear-gradient(180deg,var(--c1),transparent);margin-top:3px;opacity:.26;}
+.tl-lbl{font-size:9px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.tl-txt{font-size:11px;color:var(--text1);line-height:1.65;letter-spacing:.3px;}
+
+/* SETTINGS */
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border0);}
+.s-row-l{flex:1;margin-right:12px;}
+.s-row-t{font-size:12px;font-weight:600;color:var(--text0);letter-spacing:.6px;}
+.s-row-s{font-size:10px;color:var(--text2);margin-top:2px;letter-spacing:.3px;}
+
+.theme-row{display:flex;gap:8px;padding:12px 16px;}
+.t-opt{flex:1;padding:11px;border-radius:4px;border:1px solid var(--border0);text-align:center;cursor:pointer;font-size:10px;letter-spacing:1.2px;color:var(--text1);font-family:inherit;background:transparent;transition:all .2s;}
+.t-opt.on{border-color:var(--c1);color:var(--c1);background:rgba(0,160,200,0.07);}
+
+.about{margin:14px 16px 10px;padding:15px;background:rgba(0,14,38,0.52);border:1px solid var(--border0);border-left:3px solid var(--c1);border-radius:4px;display:flex;gap:13px;align-items:center;}
+body.light .about{background:rgba(190,215,240,0.52);}
+.about-ico{font-size:26px;}
+.about-name{font-size:13px;font-weight:700;letter-spacing:2.5px;color:var(--c1);}
+.about-ver{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:1.2px;}
+.about-desc{font-size:10px;color:var(--text2);margin-top:5px;letter-spacing:.4px;line-height:1.65;}
+
+/* START */
+.start-wrap{padding:14px 16px 10px;}
+.start-btn{
+  width:100%;padding:15px;background:transparent;border:1px solid var(--c1);border-radius:4px;
+  color:var(--c1);font-size:11px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;
+  cursor:pointer;font-family:inherit;position:relative;overflow:hidden;transition:all .3s;
+}
+.start-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,200,255,0.09),transparent);transform:translateX(-100%);transition:transform .5s;}
+.start-btn:hover{background:rgba(0,180,220,0.08);box-shadow:0 0 20px rgba(0,180,220,0.18);}
+.start-btn:hover::before{transform:translateX(100%);}
+.start-note{font-size:10px;color:var(--text2);letter-spacing:.5px;text-align:center;margin-top:6px;line-height:1.60;}
+
+/* CONFLICT ALERT */
+.conflict-box{margin:0 16px 12px;padding:10px 13px;background:rgba(255,80,30,0.07);border:1px solid rgba(255,107,53,0.28);border-radius:4px;display:none;}
+.conflict-box.show{display:block;}
+.conflict-title{font-size:9px;font-weight:700;letter-spacing:2px;color:var(--c4);margin-bottom:5px;text-transform:uppercase;}
+.conflict-list{font-size:10px;color:rgba(255,107,53,0.75);line-height:1.65;letter-spacing:.35px;}
 </style>
 </head>
 <body>
-<div class="engine-shell">
+<div class="shell">
 
-  <!-- 顶栏 -->
-  <div class="topbar">
-    <div class="logo">UNIV<span>//</span>ENGINE</div>
-    <div class="topbar-right">
-      <button class="theme-btn" onclick="toggleTheme()">◑ THEME</button>
-    </div>
+<div class="sb">
+  <span class="sb-side" id="sbTime">00:00</span>
+  <div class="sb-mid"><div class="sb-dot"></div>A.U.T.O. TERMINAL</div>
+  <span class="sb-side">L3·ON</span>
+</div>
+
+<div class="pages">
+
+<!-- PAGE: XP -->
+<div class="page on" id="pg-xp">
+  <div class="ph">
+    <div class="ph-tag">SCENE &amp; XP CONFIG</div>
+    <div class="ph-ttl">场景与XP</div>
+    <div class="ph-sub">配置本次叙事的情境基调与XP注入参数。互斥选项自动锁定。</div>
   </div>
 
-  <!-- Tab导航 -->
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('preset')">预设</button>
-    <button class="tab-btn" onclick="switchTab('world')">世界</button>
-    <button class="tab-btn" onclick="switchTab('char')">角色</button>
-    <button class="tab-btn" onclick="switchTab('xp')">XP</button>
-    <button class="tab-btn" onclick="switchTab('review')">确认</button>
-  </div>
-
-  <!-- PAGE: 预设 -->
-  <div class="page active" id="page-preset">
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>QUICK START</div>
-      <div class="card-body">
-        <div class="preset-grid" id="preset-grid">
-          <!-- 动态生成 -->
-        </div>
-        <div class="section-gap"></div>
-        <div style="font-size:10px;color:var(--text2);margin-top:4px;">选择预设后可在各页继续叠加修改</div>
-      </div>
+  <div class="blk">
+    <div class="sec">情绪基调</div>
+    <div class="mood-box">
+      <input type="range" class="mood-sl" min="0" max="100" value="55" oninput="updateMood(this.value)" id="moodSl">
+      <div class="mood-ends"><span class="mood-end">◀ 低沉压抑</span><span class="mood-end">明朗高扬 ▶</span></div>
+      <div class="mood-val" id="moodTxt">STABLE</div>
     </div>
   </div>
+  <div class="hdiv"></div>
 
-  <!-- PAGE: 世界 -->
-  <div class="page" id="page-world">
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>交互模式</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="mode">
-          <div class="radio-tag" data-val="纯叙事">纯叙事</div>
-          <div class="radio-tag" data-val="轻RPG">轻RPG</div>
-          <div class="radio-tag" data-val="重RPG">重RPG</div>
-          <div class="radio-tag" data-val="沙盒">沙盒</div>
-        </div>
+  <div class="blk">
+    <div class="sec">场景设定</div>
+    <div class="sc-grid" id="scGrid"></div>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk">
+    <div class="sec">XP 偏好注入</div>
+    <div id="xpList"></div>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk">
+    <div class="sec">叙事深度</div>
+    <div class="dg">
+      <div class="dc"><div class="dc-l">心理层</div><div class="dc-v">深层</div><div class="dc-s">内心博弈优先</div></div>
+      <div class="dc"><div class="dc-l">感官层</div><div class="dc-v">强化</div><div class="dc-s">具象化描写</div></div>
+      <div class="dc"><div class="dc-l">节奏</div><div class="dc-v">慢热</div><div class="dc-s">张力积累型</div></div>
+      <div class="dc"><div class="dc-l">视角</div><div class="dc-v">第三</div><div class="dc-s">限制性全知</div></div>
+    </div>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk">
+    <div class="sec">美学协议</div>
+    <div class="proto" id="proto-acp">
+      <div class="proto-head">
+        <div class="proto-name">Aesthetic_Core_Protocol</div>
+        <div class="proto-badge standby" id="badge-acp">STANDBY</div>
+      </div>
+      <div class="proto-desc">五维扫描：外装→内衣→丝袜→鞋履→首饰。分层材质描写，感官具象化音效，高位女性"物理不朽"秩序感。</div>
+      <div class="proto-rules">
+        <div class="proto-rule"><strong>【分层描写】</strong> 严禁笼统概括，细化每层材质与肢体物理作用力（勒痕/受压/紧绷感）</div>
+        <div class="proto-rule"><strong>【感官具象化】</strong> 必须描述高跟鞋敲击特定地面（大理石/金属/木质）的音质与节奏</div>
+        <div class="proto-rule"><strong>【无损秩序】</strong> 高位女性服饰呈现"绝对整齐"与"物理不朽感"，丝袜时刻保持月华凝脂质感</div>
+        <div class="proto-rule"><strong>【跳过逻辑】</strong> 外貌为老婆婆/老奶奶时，一笔带过，严禁触发后续穿搭描写</div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>尺度上限</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="scale">
-          <div class="radio-tag" data-val="全年龄">全年龄</div>
-          <div class="radio-tag" data-val="R15">R15</div>
-          <div class="radio-tag" data-val="R18">R18</div>
-          <div class="radio-tag" data-val="R18G">R18G</div>
-        </div>
+    <div class="proto" id="proto-rhm">
+      <div class="proto-head">
+        <div class="proto-name">Resource_Hierarchy_Matrix</div>
+        <div class="proto-badge standby" id="badge-rhm">STANDBY</div>
+      </div>
+      <div class="proto-desc">三阶物料体系：Apex（月华凝脂纤维·权力律动音质）/ Elite（亮面油青·高压步态）/ Common（混纺质感·环境音效反馈）。</div>
+      <div class="proto-rules">
+        <div class="proto-rule"><strong>【Apex】</strong> 月华凝脂/实验室生物纤维，&lt;15D，随体温流动；外衣记忆型流光面料，落地声清冷空灵</div>
+        <div class="proto-rule"><strong>【Elite】</strong> 顶级亮面油青/丝绸质感，重磅真丝/漆皮，落地声急促清脆富有张力</div>
+        <div class="proto-rule"><strong>【Common】</strong> 优质混纺，允许活动褶皱，品牌量产鞋履，扎实日常行走声</div>
+        <div class="proto-rule"><strong>【核心要求】</strong> 通过光影解析度与材质稀有感侧写角色统治力，而非堆砌形容词</div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>描写侧重</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="focus">
-          <div class="radio-tag" data-val="剧情为主">剧情为主</div>
-          <div class="radio-tag" data-val="官能为主">官能为主</div>
-          <div class="radio-tag" data-val="五五开">五五开</div>
-        </div>
+    <div class="proto" id="proto-lgc">
+      <div class="proto-head">
+        <div class="proto-name">Logic_Guard_Correction_Protocol</div>
+        <div class="proto-badge standby" id="badge-lgc">STANDBY</div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>时代</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="era">
-          <div class="radio-tag" data-val="神话">神话</div>
-          <div class="radio-tag" data-val="古代东方">古代东方</div>
-          <div class="radio-tag" data-val="仙侠">仙侠</div>
-          <div class="radio-tag" data-val="中世纪">中世纪</div>
-          <div class="radio-tag" data-val="近代">近代</div>
-          <div class="radio-tag" data-val="现代">现代</div>
-          <div class="radio-tag" data-val="近未来">近未来</div>
-          <div class="radio-tag" data-val="远未来">远未来</div>
-          <div class="radio-tag" data-val="末日废土">末日废土</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>世界类型</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="worldtype">
-          <div class="radio-tag" data-val="现实">现实</div>
-          <div class="radio-tag" data-val="低魔">低魔</div>
-          <div class="radio-tag" data-val="高魔">高魔</div>
-          <div class="radio-tag" data-val="赛博朋克">赛博朋克</div>
-          <div class="radio-tag" data-val="硬科幻">硬科幻</div>
-          <div class="radio-tag" data-val="克苏鲁">克苏鲁</div>
-          <div class="radio-tag" data-val="蒸汽朋克">蒸汽朋克</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>特殊规则</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="worldrule">
-          <div class="radio-tag" data-val="无">无</div>
-          <div class="radio-tag" data-val="奴隶制">奴隶制</div>
-          <div class="radio-tag" data-val="性开放">性开放</div>
-          <div class="radio-tag" data-val="母系极端">母系极端</div>
-          <div class="radio-tag" data-val="阶级美学">阶级美学</div>
-          <div class="radio-tag" data-val="异种共存">异种共存</div>
-        </div>
-        <textarea class="custom-input" rows="2" placeholder="自定义规则补充..." id="world-custom"></textarea>
+      <div class="proto-desc">逻辑冲突解决与细节强制补完机制。阶级美学优先于剧情冲突，遗漏五维自动补全。</div>
+      <div class="proto-rules">
+        <div class="proto-rule"><strong>【冲突优先】</strong> 人设冲突（落魄/战斗中）时，仍优先执行阶级美学——废墟中也要描写紧致丝袜与挺拔鞋跟</div>
+        <div class="proto-rule"><strong>【强制补完】</strong> 遗漏声响反馈或五维分层任意一层时，下一段以视角转动方式补全足部或内衣勒痕特写</div>
+        <div class="proto-rule"><strong>【秩序修复】</strong> 战斗间隙/结束后，高位女性第一时间理顺衣褶，确认丝袜平整度</div>
+        <div class="proto-rule"><strong>【语言风格】</strong> 冷冽、华丽且充满侵略性；坚决杜绝任何形式的松弛感</div>
       </div>
     </div>
   </div>
 
-  <!-- PAGE: 角色 -->
-  <div class="page" id="page-char">
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>主角当前形态</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="player-gender">
-          <div class="radio-tag" data-val="叶青云（男）">叶青云·男</div>
-          <div class="radio-tag" data-val="叶清芸（女）">叶清芸·女</div>
-          <div class="radio-tag" data-val="自由切换">自由切换</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>对象气质</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="vibe">
-          <div class="radio-tag" data-val="御姐">御姐</div>
-          <div class="radio-tag" data-val="美妇">美妇</div>
-          <div class="radio-tag" data-val="少女">少女</div>
-          <div class="radio-tag" data-val="冷艳">冷艳</div>
-          <div class="radio-tag" data-val="温柔">温柔</div>
-          <div class="radio-tag" data-val="傲娇">傲娇</div>
-          <div class="radio-tag" data-val="病娇">病娇</div>
-          <div class="radio-tag" data-val="腹黑">腹黑</div>
-          <div class="radio-tag" data-val="英气">英气</div>
-          <div class="radio-tag" data-val="妖媚">妖媚</div>
-          <div class="radio-tag" data-val="人外">人外</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>对象身份</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="char-role">
-          <div class="radio-tag" data-val="宗主/领主">宗主·领主</div>
-          <div class="radio-tag" data-val="财阀高管">财阀高管</div>
-          <div class="radio-tag" data-val="同班同学">同班同学</div>
-          <div class="radio-tag" data-val="贵族">贵族</div>
-          <div class="radio-tag" data-val="妃嫔">妃嫔</div>
-          <div class="radio-tag" data-val="秘书">秘书</div>
-          <div class="radio-tag" data-val="将领">将领</div>
-          <div class="radio-tag" data-val="刺客">刺客</div>
-          <div class="radio-tag" data-val="神明">神明</div>
-          <div class="radio-tag" data-val="普通人">普通人</div>
-        </div>
-        <textarea class="custom-input" rows="2" placeholder="自定义身份..." id="char-custom"></textarea>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>关系起点</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="rel-start">
-          <div class="radio-tag" data-val="陌生">陌生</div>
-          <div class="radio-tag" data-val="旧识">旧识</div>
-          <div class="radio-tag" data-val="恋人">恋人</div>
-          <div class="radio-tag" data-val="主从·我主">主从·我主</div>
-          <div class="radio-tag" data-val="主从·她主">主从·她主</div>
-          <div class="radio-tag" data-val="敌对">敌对</div>
-          <div class="radio-tag" data-val="师生">师生</div>
-          <div class="radio-tag" data-val="上下级">上下级</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>关系走向</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="rel-end">
-          <div class="radio-tag" data-val="攻略">攻略</div>
-          <div class="radio-tag" data-val="权争">权争</div>
-          <div class="radio-tag" data-val="救赎">救赎</div>
-          <div class="radio-tag" data-val="调教">调教</div>
-          <div class="radio-tag" data-val="对抗">对抗</div>
-          <div class="radio-tag" data-val="堕落">堕落</div>
-          <div class="radio-tag" data-val="依存">依存</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>叙事风格</div>
-      <div class="card-body">
-        <div class="radio-group" data-group="narrative-tone">
-          <div class="radio-tag" data-val="轻松">轻松</div>
-          <div class="radio-tag" data-val="浪漫">浪漫</div>
-          <div class="radio-tag" data-val="紧张">紧张</div>
-          <div class="radio-tag" data-val="阴郁">阴郁</div>
-          <div class="radio-tag" data-val="史诗">史诗</div>
-          <div class="radio-tag" data-val="官能">官能</div>
-          <div class="radio-tag" data-val="恐怖">恐怖</div>
-        </div>
-      </div>
+  <div class="conflict-box" id="conflictBox">
+    <div class="conflict-title">⚠ 冲突检测</div>
+    <div class="conflict-list" id="conflictList"></div>
+  </div>
+
+  <div class="start-wrap">
+    <button class="start-btn" onclick="doStart()">◈ INITIALIZE SESSION ◈</button>
+    <div class="start-note" id="startNote">完成配置后点击上方按钮 · 配置将注入叙事开场</div>
+  </div>
+</div>
+
+<!-- PAGE: CHAR -->
+<div class="page" id="pg-char">
+  <div class="cid">
+    <div class="cid-orb">✧</div>
+    <div>
+      <div class="cid-id">UNIT · 神女血脉 · 双重血统</div>
+      <div class="cid-name">叶青云 / 叶清芸</div>
+      <div class="cid-alias">女性形态：叶清芸 · 秒级切换 · 两名皆我</div>
     </div>
   </div>
 
-  <!-- PAGE: XP -->
-  <div class="page" id="page-xp">
-    <div class="conflict-hint" id="conflict-hint">⚠ 部分选项存在冲突，已自动锁定</div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>感官系</div>
-      <div class="card-body">
-        <div class="tag-grid" data-xpgroup="sense">
-          <div class="tag" data-val="黑丝">黑丝</div>
-          <div class="tag" data-val="肉丝">肉丝</div>
-          <div class="tag" data-val="白丝">白丝</div>
-          <div class="tag" data-val="网袜">网袜</div>
-          <div class="tag" data-val="过膝袜">过膝袜</div>
-          <div class="tag" data-val="细跟高跟">细跟高跟</div>
-          <div class="tag" data-val="长靴">长靴</div>
-          <div class="tag" data-val="裸足">裸足</div>
-          <div class="tag" data-val="OL装">OL装</div>
-          <div class="tag" data-val="校服">校服</div>
-          <div class="tag" data-val="女仆">女仆</div>
-          <div class="tag" data-val="护士">护士</div>
-          <div class="tag" data-val="军装">军装</div>
-          <div class="tag" data-val="旗袍">旗袍</div>
-          <div class="tag" data-val="修女">修女</div>
-          <div class="tag" data-val="皮革">皮革</div>
-          <div class="tag" data-val="乳胶">乳胶</div>
-          <div class="tag" data-val="蕾丝">蕾丝</div>
-          <div class="tag" data-val="湿身">湿身</div>
-          <div class="tag" data-val="巨乳">巨乳</div>
-          <div class="tag" data-val="贫乳">贫乳</div>
-          <div class="tag" data-val="体香">体香</div>
-          <div class="tag" data-val="足控">足控</div>
-        </div>
+  <div class="blk" style="margin-top:12px;">
+    <div class="sec">当前形态</div>
+    <div class="g-wrap">
+      <div class="g-row">
+        <button class="g-btn male on" id="gb-m" onclick="switchG('male')">♂ 叶青云</button>
+        <button class="g-btn female" id="gb-f" onclick="switchG('female')">♀ 叶清芸</button>
+      </div>
+      <div class="g-disp" id="gDisp"></div>
+    </div>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk">
+    <div class="sec">角色特质</div>
+    <div class="tag-cloud" id="cTags"></div>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk">
+    <div class="sec">核心属性</div>
+    <div id="cStats"></div>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk">
+    <div class="sec">病历档案</div>
+    <div class="card" style="margin-bottom:9px;">
+      <div class="dc-l" style="margin-bottom:6px;">DIAGNOSIS · 诊断记录</div>
+      <div style="font-size:12px;color:var(--text1);line-height:1.74;letter-spacing:.36px;">
+        双向情感障碍 · 高功能型 · 病龄十年<br>
+        认知功能高度损耗，现阶段病情较为稳定。<br>
+        <span style="font-size:10px;color:var(--text2);">治疗方案：天生擅长的元认知训练（零外部干预）</span>
       </div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="dot"></div>权力系</div>
-      <div class="card-body">
-        <div class="tag-grid" data-xpgroup="power">
-          <div class="tag" data-val="女王">女王</div>
-          <div class="tag" data-val="调教">调教</div>
-          <div class="tag" data-val="踩踏">踩踏</div>
-          <div class="tag" data-val="羞辱">羞辱</div>
-          <div class="tag" data-val="贞操管理">贞操管理</div>
-          <div class="tag" data-val="服从">服从</div>
-          <div class="tag" data-val="奴隶">奴隶</div>
-          <div class="tag" data-val="宠物化">宠物化</div>
-          <div class="tag" data-val="物化">物化</div>
-          <div class="tag" data-val="家具化">家具化</div>
-          <div class="tag" data-val="绳缚">绳缚</div>
-          <div class="tag" data-val="锁链">锁链</div>
-          <div class="tag" data-val="口球">口球</div>
-          <div class="tag" data-val="鞭打">鞭打</div>
-          <div class="tag" data-val="蜡烛">蜡烛</div>
-          <div class="tag" data-val="窒息">窒息</div>
-          <div class="tag" data-val="禁止高潮">禁止高潮</div>
-        </div>
+      <div class="dc-l" style="margin-bottom:6px;">PERCEPTION · 感知档案</div>
+      <div style="font-size:12px;color:var(--text1);line-height:1.74;letter-spacing:.36px;">
+        感官、洞察力与直觉异常敏感——大脑天生功能异常发达，但病躯已难支持高功耗运转。过于复杂，世界上或许仅有数十人与之相同或类似。
       </div>
     </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>情境系</div>
-      <div class="card-body">
-        <div class="tag-grid" data-xpgroup="scene">
-          <div class="tag" data-val="纯爱" data-conflicts="NTR,强制,胁迫">纯爱</div>
-          <div class="tag" data-val="NTR" data-conflicts="纯爱">NTR</div>
-          <div class="tag" data-val="后宫">后宫</div>
-          <div class="tag" data-val="偷窥">偷窥</div>
-          <div class="tag" data-val="自愿" data-conflicts="强制,胁迫">自愿</div>
-          <div class="tag" data-val="半推半就">半推半就</div>
-          <div class="tag" data-val="强制" data-conflicts="纯爱,自愿">强制</div>
-          <div class="tag" data-val="催眠">催眠</div>
-          <div class="tag" data-val="胁迫" data-conflicts="纯爱,自愿">胁迫</div>
-          <div class="tag" data-val="公开露出">公开露出</div>
-          <div class="tag" data-val="电车">电车</div>
-          <div class="tag" data-val="密室">密室</div>
-          <div class="tag" data-val="户外">户外</div>
-          <div class="tag" data-val="师生">师生</div>
-          <div class="tag" data-val="年龄差">年龄差</div>
-          <div class="tag" data-val="近亲">近亲</div>
-          <div class="tag" data-val="人外">人外</div>
-          <div class="tag" data-val="阶级差">阶级差</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>身体系</div>
-      <div class="card-body">
-        <div class="tag-grid" data-xpgroup="body">
-          <div class="tag" data-val="性转">性转</div>
-          <div class="tag" data-val="触手">触手</div>
-          <div class="tag" data-val="兽人">兽人</div>
-          <div class="tag" data-val="怀孕">怀孕</div>
-          <div class="tag" data-val="产卵">产卵</div>
-          <div class="tag" data-val="身体改造">身体改造</div>
-          <div class="tag" data-val="烙印">烙印</div>
-          <div class="tag" data-val="肉铠">肉铠</div>
-          <div class="tag" data-val="共生寄生">共生寄生</div>
-          <div class="tag" data-val="子宫奸">子宫奸</div>
-          <div class="tag" data-val="器官改造">器官改造</div>
-          <div class="tag" data-val="神经改造">神经改造</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>心理系</div>
-      <div class="card-body">
-        <div class="tag-grid" data-xpgroup="mind">
-          <div class="tag" data-val="催眠控制">催眠控制</div>
-          <div class="tag" data-val="洗脑">洗脑</div>
-          <div class="tag" data-val="清纯堕落">清纯堕落</div>
-          <div class="tag" data-val="贵族堕落">贵族堕落</div>
-          <div class="tag" data-val="英雄堕落">英雄堕落</div>
-          <div class="tag" data-val="病态执念">病态执念</div>
-          <div class="tag" data-val="依赖共生">依赖共生</div>
-          <div class="tag" data-val="斯德哥尔摩">斯德哥尔摩</div>
-          <div class="tag" data-val="认知重写">认知重写</div>
-          <div class="tag" data-val="空白期">空白期</div>
-          <div class="tag" data-val="三重压迫">三重压迫</div>
-        </div>
-        <textarea class="custom-input" rows="2" placeholder="自定义XP补充..." id="xp-custom"></textarea>
-      </div>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk">
+    <div class="sec">角色概述</div>
+    <div class="card"><div class="bio-txt" id="cBio"></div></div>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk">
+    <div class="sec">命运脉络</div>
+    <div id="cTimeline"></div>
+  </div>
+</div>
+
+<!-- PAGE: SETTINGS -->
+<div class="page" id="pg-set">
+  <div class="ph">
+    <div class="ph-tag">SYSTEM CONFIG</div>
+    <div class="ph-ttl">系统设定</div>
+    <div class="ph-sub">配置叙事引擎运行参数、协议开关与显示偏好</div>
+  </div>
+
+  <div class="blk" style="padding-bottom:0;"><div class="sec">显示模式</div></div>
+  <div class="theme-row">
+    <button class="t-opt on" id="btn-dark" onclick="setTheme('dark')">◼ 暗色</button>
+    <button class="t-opt" id="btn-light" onclick="setTheme('light')">◻ 明色</button>
+  </div>
+  <div class="hdiv"></div>
+
+  <div class="blk" style="padding-bottom:4px;"><div class="sec">引擎参数</div></div>
+  <div id="settingRows"></div>
+  <div class="hdiv" style="margin-top:4px;"></div>
+
+  <div class="blk">
+    <div class="sec">系统数据</div>
+    <div class="dg" style="margin-bottom:12px;">
+      <div class="dc"><div class="dc-l">位置</div><div class="dc-v" style="font-size:12px;">L3 POINT</div><div class="dc-s">地月拉格朗日点</div></div>
+      <div class="dc"><div class="dc-l">协议</div><div class="dc-v" style="font-size:12px;">ACTIVE</div><div class="dc-s">叙事协议在线</div></div>
+      <div class="dc"><div class="dc-l">美学核心</div><div class="dc-v" style="font-size:12px;">ON</div><div class="dc-s">Aesthetic_Core</div></div>
+      <div class="dc"><div class="dc-l">约束</div><div class="dc-v" style="font-size:12px;">NONE</div><div class="dc-s">外部限制已解除</div></div>
     </div>
   </div>
 
-  <!-- PAGE: 确认 -->
-  <div class="page" id="page-review">
-    <div class="card">
-      <div class="card-header"><div class="dot"></div>当前配置快照</div>
-      <div class="card-body" id="snapshot-body">
-        <!-- 动态生成 -->
+  <div class="about">
+    <div class="about-ico">◈</div>
+    <div>
+      <div class="about-name">A.U.T.O. TERMINAL</div>
+      <div class="about-ver">v2.1 · WORLD ENGINE · L3 STATION</div>
+      <div class="about-desc">
+        晏创造 · 地月L3拉格朗日点 · 深度叙事协议<br>
+        Aesthetic_Core · Resource_Hierarchy · Logic_Guard 已加载
       </div>
     </div>
   </div>
+</div>
 
-  <!-- 发送区（常驻） -->
-  <div class="send-area">
-    <div class="send-preview" id="send-preview">尚未选择任何配置</div>
-    <button class="send-btn" onclick="sendConfig()">▶ 开始生成</button>
-    <button class="clear-btn" onclick="clearAll()">↺ 清空重选</button>
+</div><!-- /pages -->
+
+<div class="tabs" id="tabBar">
+  <div class="tab on" data-p="xp">
+    <div class="t-ico"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+    <span class="t-lbl">场景XP</span>
   </div>
+  <div class="tab" data-p="char">
+    <div class="t-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+    <span class="t-lbl">角色</span>
+  </div>
+  <div class="tab" data-p="set">
+    <div class="t-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+    <span class="t-lbl">设定</span>
+  </div>
+</div>
 
 </div>
 
 <script>
-// ═══════════════════════════════
-// 状态存储
-// ═══════════════════════════════
-const state = {
-  preset: null,
-  mode: null,
-  scale: null,
-  focus: null,
-  era: null,
-  worldtype: null,
-  worldrule: null,
-  'player-gender': null,
-  vibe: null,
-  'char-role': null,
-  'rel-start': null,
-  'rel-end': null,
-  'narrative-tone': null,
-  xp: new Set(),
-  'world-custom': '',
-  'char-custom': '',
-  'xp-custom': ''
-};
+/* ═══ DATA ═══ */
+var MOODS=['CRITICAL','DEPRESSED','SUPPRESSED','UNEASY','FLUCTUANT','STABLE','ALERT','ELEVATED','BRIGHT'];
 
-// ═══════════════════════════════
-// 预设数据
-// ═══════════════════════════════
-const presets = [
-  { id:'P1', name:'仙侠遭遇', tags:'宗门高魔·御姐宗主·年龄差·丝袜', scale:'R18',
-    config:{ mode:'轻RPG', scale:'R18', focus:'五五开', era:'仙侠', worldtype:'高魔', vibe:'御姐', 'rel-start':'主从·她主', xp:['年龄差','黑丝','细跟高跟'] }},
-  { id:'P2', name:'赛博暗影', tags:'2087霓虹·财阀高管·义体改造·权谋', scale:'R18',
-    config:{ mode:'重RPG', scale:'R18', focus:'剧情为主', era:'近未来', worldtype:'赛博朋克', vibe:'冷艳', 'char-role':'财阀高管', 'rel-start':'敌对', xp:['身体改造'] }},
-  { id:'P3', name:'校园温情', tags:'现代·同班同学·纯爱·轻RPG', scale:'R15',
-    config:{ mode:'轻RPG', scale:'R15', focus:'剧情为主', era:'现代', worldtype:'现实', vibe:'温柔', 'char-role':'同班同学', 'rel-start':'陌生', xp:['纯爱'] }},
-  { id:'P4', name:'黑暗征服', tags:'中世纪高魔·被俘贵族·调教·史诗', scale:'R18G',
-    config:{ mode:'重RPG', scale:'R18G', focus:'官能为主', era:'中世纪', worldtype:'高魔', vibe:'傲娇', 'char-role':'贵族', 'rel-start':'敌对', 'narrative-tone':'史诗', xp:['调教','强制','绳缚'] }},
-  { id:'P5', name:'都市怪谈', tags:'低魔现代·克苏鲁暗流·理智值', scale:'R15',
-    config:{ mode:'轻RPG', scale:'R15', focus:'剧情为主', era:'现代', worldtype:'克苏鲁', 'rel-start':'陌生', 'narrative-tone':'恐怖', xp:['催眠'] }},
-  { id:'P6', name:'末日信任', tags:'废土第47年·女将·信任博弈·慢热', scale:'R18',
-    config:{ mode:'重RPG', scale:'R18', focus:'剧情为主', era:'末日废土', worldtype:'现实', vibe:'英气', 'char-role':'将领', 'rel-start':'敌对', xp:[] }},
-  { id:'P7', name:'宫廷权谋', tags:'古代东方·后宫博弈·腹黑妃嫔', scale:'R18',
-    config:{ mode:'纯叙事', scale:'R18', focus:'剧情为主', era:'古代东方', worldtype:'低魔', vibe:'腹黑', 'char-role':'妃嫔', 'narrative-tone':'紧张', xp:['阶级差'] }},
-  { id:'P8', name:'纯感官', tags:'自定义组合·官能为主·任意追加', scale:'R18',
-    config:{ mode:'纯叙事', scale:'R18', focus:'官能为主', xp:[] }}
+// conflict rules: if item A is on and item B is on, show warning
+// format: [idxA, idxB, message]
+var CONFLICTS=[
+  [2,3,'「神女血脉显化」与「人设严格模式」在超自然感知的显化程度上存在分歧，建议二选一'],
+  [4,6,'「双重身份张力」与「情绪崩溃可写」同时激活时，剧情可能快速失控，确认人设能否承载'],
+  [7,9,'「美学协议激活」与「逻辑守护协议」同时开启时，极端场景下的逻辑压力极大，建议评估']
 ];
 
-// 冲突规则（双向）
-const conflictMap = {
-  '纯爱': ['NTR','强制','胁迫'],
-  'NTR': ['纯爱'],
-  '自愿': ['强制','胁迫'],
-  '强制': ['纯爱','自愿'],
-  '胁迫': ['纯爱','自愿'],
+var XP_DATA=[
+  {i:'🧠',l:'心理张力优先',   s:'侧重内心博弈而非外在行为',          on:true,  group:null},
+  {i:'✦', l:'感官细节描写',   s:'触感/声音/光影的具象化呈现',        on:true,  group:null},
+  {i:'🌊',l:'慢热渐进叙事',   s:'节奏克制，张力在细节中积累',        on:false, group:'pace'},
+  {i:'⚡',l:'高密度叙事',    s:'快节奏，强刺激，省略过渡铺垫',       on:false, group:'pace'},
+  {i:'💫',l:'神女血脉显化',   s:'允许超自然感知能力被觉察',          on:false, group:null},
+  {i:'⚥', l:'双重身份张力',  s:'性别切换作为核心叙事工具',          on:false, group:null},
+  {i:'🩸',l:'情绪崩溃可写',   s:'允许双向障碍发作的真实描绘',        on:false, group:null},
+  {i:'👁', l:'元认知视角',    s:'以旁观者视角审视自身情绪',          on:true,  group:null},
+  {i:'✨',l:'美学协议激活',   s:'Aesthetic_Core 五维渲染全开',       on:false, group:null},
+  {i:'💎',l:'阶级材质渲染',   s:'Resource_Hierarchy 光影解析度优先', on:false, group:null},
+  {i:'🛡', l:'逻辑守护协议',  s:'Logic_Guard 秩序修复·强制补完',    on:false, group:null},
+  {i:'📐',l:'严格人设模式',   s:'决策优先遵从既有人设逻辑',          on:true,  group:null}
+];
+
+var SCENES=[
+  {em:'🌙',t:'深夜独白',  s:'私密·内省',    on:true},
+  {em:'⚡',t:'暗流角力',  s:'张力·对峙',    on:false},
+  {em:'🌸',t:'初识微妙',  s:'暧昧·试探',    on:false},
+  {em:'🔮',t:'命运交汇',  s:'神秘·宿命',    on:false},
+  {em:'🫀',t:'情感拉锯',  s:'矛盾·纠葛',    on:false},
+  {em:'⚥', t:'形态切换', s:'流动·身份',    on:false},
+  {em:'🩸',t:'病魔阴影',  s:'崩溃·挣扎',    on:false},
+  {em:'◈', t:'自定义',   s:'自由·创造',    on:false}
+];
+
+var SETTINGS=[
+  {t:'叙事视角',         s:'叶青云第一/第三人称限制视角',             sw:true},
+  {t:'元叙事提示',       s:'允许A.U.T.O.跳出角色进行说明',           sw:false},
+  {t:'Aesthetic_Core',  s:'五维穿搭扫描·感官具象化',                sw:true},
+  {t:'Resource_Hierarchy',s:'三阶物料体系·光影解析度侧写统治力',     sw:false},
+  {t:'Logic_Guard',     s:'阶级冲突强制美学·遗漏五维自动补完',      sw:false},
+  {t:'自动场景过渡',     s:'{{char}}可主动切换场景节奏',             sw:true},
+  {t:'命运节点提示',     s:'关键剧情节点前给出预警',                  sw:true},
+  {t:'美学音效反馈',     s:'鞋跟落地声·地面材质音质精确描写',        sw:false}
+];
+
+var CHAR={
+  tags:[['✦ 神女血脉','tc1'],['♂♀ 性别流动','tc2'],['IQ 150+','tc3'],['INTP','tc1'],['摩羯座','tc1'],['双向情感障碍','tc4'],['元认知自训','tc1'],['超感洞察','tc2'],['孤芳自赏','tc4'],['十年病龄','tc4']],
+  stats:[
+    ['INTEL',96,'#008fcc','#00d4ff','150+'],
+    ['PERCEP',93,'#00b87a','#00ffcc','神级'],
+    ['CHARM',89,'#bb4400','#ff7030','天赋'],
+    ['ENDUR',70,'#4455cc','#7788ff','损耗'],
+    ['AURA',98,'#8800cc','#cc44ff','神授'],
+    ['CTRL',76,'#007788','#00ccdd','稳定']
+  ],
+  bio:'同时拥有人类与神女血脉，这个秘密几乎无人知晓，除了某些与他有重大渊源的人物。也因此没有固定性别，可在短短几秒内自主切换男女形态：男性的他俊朗深沉，气质不显得过于夺目；女性的她柔美淡雅，却不过于诱人。INTP摩羯，性格开朗而敏感，冷静过人，散发着独特无比的魅力——可悲的是过于复杂，世界上或许仅有数十人与之相同或类似，只能常常在角落里孤芳自赏。',
+  timeline:[
+    {lbl:'起点',txt:'双重血脉觉醒，性别流动能力显现。极少数知情者开始注意到这个异数的存在。'},
+    {lbl:'发病',txt:'双向情感障碍确诊，高功能型。放弃外部治疗，凭天生擅长的元认知训练独行至今，病龄十年。'},
+    {lbl:'当下',txt:'病情较为稳定。高度损耗的认知功能与超乎常人的感知力并存，在病魔阴影下从未放弃。'},
+    {lbl:'未知',txt:'神女血脉的深层意义尚未解锁。与重大渊源的人物相遇，命运节点正在逼近。'}
+  ]
 };
 
-// ═══════════════════════════════
-// 初始化预设卡
-// ═══════════════════════════════
-function initPresets() {
-  const grid = document.getElementById('preset-grid');
-  presets.forEach(p => {
-    const scaleClass = p.scale === 'R15' ? 'scale-r15' : p.scale === 'R18G' ? 'scale-r18g' : 'scale-r18';
-    const card = document.createElement('div');
-    card.className = 'preset-card';
-    card.dataset.id = p.id;
-    card.innerHTML = `
-      <div class="preset-id">${p.id}</div>
-      <div class="preset-name">${p.name}</div>
-      <div class="preset-tags">${p.tags}</div>
-      <span class="preset-scale ${scaleClass}">${p.scale}</span>
-    `;
-    card.onclick = () => applyPreset(p.id);
-    grid.appendChild(card);
-  });
-}
+/* ═══ RENDER ═══ */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function $id(id){return document.getElementById(id);}
 
-function applyPreset(id) {
-  const p = presets.find(x => x.id === id);
-  if (!p) return;
-  // 清空
-  state.xp.clear();
-  // 应用
-  state.preset = id;
-  Object.entries(p.config).forEach(([k, v]) => {
-    if (k === 'xp') { v.forEach(x => state.xp.add(x)); }
-    else { state[k] = v; }
-  });
-  // 更新所有UI
-  refreshAllSelections();
-  updatePreview();
-  // 高亮预设卡
-  document.querySelectorAll('.preset-card').forEach(c => {
-    c.classList.toggle('selected', c.dataset.id === id);
-  });
-}
-
-// ═══════════════════════════════
-// Tab切换
-// ═══════════════════════════════
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    const tabs = ['preset','world','char','xp','review'];
-    b.classList.toggle('active', tabs[i] === name);
-  });
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  if (name === 'review') renderSnapshot();
-}
-
-// ═══════════════════════════════
-// 单选组
-// ═══════════════════════════════
-function initRadioGroups() {
-  document.querySelectorAll('.radio-group[data-group]').forEach(group => {
-    const key = group.dataset.group;
-    group.querySelectorAll('.radio-tag').forEach(tag => {
-      tag.onclick = () => {
-        const val = tag.dataset.val;
-        if (state[key] === val) {
-          state[key] = null;
-          tag.classList.remove('selected');
-        } else {
-          state[key] = val;
-          group.querySelectorAll('.radio-tag').forEach(t => t.classList.remove('selected'));
-          tag.classList.add('selected');
-        }
-        state.preset = null;
-        document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
-        updatePreview();
-      };
+function renderScenes(){
+  var g=$id('scGrid');if(!g)return;g.innerHTML='';
+  SCENES.forEach(function(s,i){
+    var c=document.createElement('div');c.className='sc-card'+(s.on?' on':'');
+    c.innerHTML='<span class="sc-em">'+s.em+'</span><div class="sc-t">'+esc(s.t)+'</div><div class="sc-s">'+esc(s.s)+'</div>';
+    c.addEventListener('click',function(){
+      SCENES.forEach(function(x){x.on=false;});s.on=true;renderScenes();
     });
+    g.appendChild(c);
   });
 }
 
-// ═══════════════════════════════
-// XP多选 + 冲突检测
-// ═══════════════════════════════
-function initXPTags() {
-  document.querySelectorAll('.tag-grid .tag').forEach(tag => {
-    tag.onclick = () => {
-      if (tag.classList.contains('conflict-locked')) return;
-      const val = tag.dataset.val;
-      if (state.xp.has(val)) {
-        state.xp.delete(val);
-        tag.classList.remove('selected');
-      } else {
-        state.xp.add(val);
-        tag.classList.add('selected');
-      }
-      applyConflicts();
-      updatePreview();
-    };
+function renderXP(){
+  var xl=$id('xpList');if(!xl)return;xl.innerHTML='';
+  XP_DATA.forEach(function(x,i){
+    var row=document.createElement('div');row.className='xp-row';row.id='xpr-'+i;
+    row.innerHTML='<span class="xp-ico">'+x.i+'</span><div class="xp-body"><div class="xp-lbl">'+esc(x.l)+'</div><div class="xp-sub">'+esc(x.s)+'</div><div class="xp-warn" id="xpw-'+i+'"></div></div><div class="sw'+(x.on?' on':'')+'" id="sw-'+i+'" onclick="toggleXP('+i+')"></div>';
+    xl.appendChild(row);
   });
+  checkConflicts();
+  updateProtoBadges();
 }
 
-function applyConflicts() {
-  let hasConflict = false;
-  // 收集所有当前激活的冲突目标
-  const locked = new Set();
-  state.xp.forEach(val => {
-    const conflicts = conflictMap[val] || [];
-    conflicts.forEach(c => locked.add(c));
+function toggleXP(i){
+  var x=XP_DATA[i];
+  var newOn=!x.on;
+  // group: single-select within group
+  if(x.group&&newOn){
+    XP_DATA.forEach(function(other,j){if(other.group===x.group&&j!==i)other.on=false;});
+  }
+  x.on=newOn;
+  renderXP();
+}
+
+function checkConflicts(){
+  // reset
+  XP_DATA.forEach(function(x,i){
+    var w=$id('xpw-'+i);var r=$id('xpr-'+i);
+    if(w)w.textContent='';if(r)r.classList.remove('conflict-warn');
   });
-  document.querySelectorAll('.tag-grid .tag').forEach(tag => {
-    const val = tag.dataset.val;
-    if (locked.has(val) && !state.xp.has(val)) {
-      tag.classList.add('conflict-locked');
-      hasConflict = true;
-    } else {
-      tag.classList.remove('conflict-locked');
+  var msgs=[];
+  CONFLICTS.forEach(function(c){
+    if(XP_DATA[c[0]].on&&XP_DATA[c[1]].on){
+      msgs.push('· '+c[2]);
+      var wa=$id('xpw-'+c[0]);var wb=$id('xpw-'+c[1]);
+      var ra=$id('xpr-'+c[0]);var rb=$id('xpr-'+c[1]);
+      if(wa)wa.textContent='⚠ 与「'+XP_DATA[c[1]].l+'」存在冲突';
+      if(wb)wb.textContent='⚠ 与「'+XP_DATA[c[0]].l+'」存在冲突';
+      if(ra)ra.classList.add('conflict-warn');
+      if(rb)rb.classList.add('conflict-warn');
     }
   });
-  const hint = document.getElementById('conflict-hint');
-  hint.classList.toggle('visible', hasConflict);
-}
-
-// ═══════════════════════════════
-// 自定义输入
-// ═══════════════════════════════
-function initCustomInputs() {
-  ['world-custom','char-custom','xp-custom'].forEach(id => {
-    const el = document.getElementById(id);
-    el.oninput = () => {
-      state[id] = el.value;
-      updatePreview();
-    };
-  });
-}
-
-// ═══════════════════════════════
-// 刷新全部UI选中状态
-// ═══════════════════════════════
-function refreshAllSelections() {
-  // 单选组
-  document.querySelectorAll('.radio-group[data-group]').forEach(group => {
-    const key = group.dataset.group;
-    group.querySelectorAll('.radio-tag').forEach(tag => {
-      tag.classList.toggle('selected', state[key] === tag.dataset.val);
-    });
-  });
-  // XP多选
-  document.querySelectorAll('.tag-grid .tag').forEach(tag => {
-    tag.classList.toggle('selected', state.xp.has(tag.dataset.val));
-    tag.classList.remove('conflict-locked');
-  });
-  applyConflicts();
-  // 自定义输入
-  ['world-custom','char-custom','xp-custom'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = state[id] || '';
-  });
-}
-
-// ═══════════════════════════════
-// 生成配置字符串
-// ═══════════════════════════════
-function buildConfigString() {
-  const parts = [];
-  if (state.preset) parts.push(state.preset);
-  const keyLabels = [
-    ['mode','模式'],['scale','尺度'],['focus','侧重'],
-    ['era','时代'],['worldtype','类型'],['worldrule','规则'],
-    ['player-gender','主角'],['vibe','气质'],['char-role','对象身份'],
-    ['rel-start','关系起点'],['rel-end','关系走向'],['narrative-tone','基调']
-  ];
-  keyLabels.forEach(([k, label]) => {
-    if (state[k]) parts.push(`${label}:${state[k]}`);
-  });
-  if (state.xp.size > 0) parts.push('XP:' + [...state.xp].join('·'));
-  const customs = [state['world-custom'],state['char-custom'],state['xp-custom']].filter(Boolean);
-  if (customs.length) parts.push('补充:' + customs.join('；'));
-  return parts.join(' / ');
-}
-
-// ═══════════════════════════════
-// 更新预览
-// ═══════════════════════════════
-function updatePreview() {
-  const str = buildConfigString();
-  const preview = document.getElementById('send-preview');
-  preview.textContent = str || '尚未选择任何配置';
-}
-
-// ═══════════════════════════════
-// 渲染配置快照
-// ═══════════════════════════════
-function renderSnapshot() {
-  const body = document.getElementById('snapshot-body');
-  const rows = [
-    ['预设', state.preset],
-    ['交互模式', state.mode],
-    ['尺度', state.scale],
-    ['描写侧重', state.focus],
-    ['时代', state.era],
-    ['世界类型', state.worldtype],
-    ['特殊规则', state.worldrule],
-    ['主角形态', state['player-gender']],
-    ['对象气质', state.vibe],
-    ['对象身份', state['char-role']],
-    ['关系起点', state['rel-start']],
-    ['关系走向', state['rel-end']],
-    ['叙事基调', state['narrative-tone']],
-    ['XP', state.xp.size > 0 ? [...state.xp].join('·') : null],
-    ['自定义补充', [state['world-custom'],state['char-custom'],state['xp-custom']].filter(Boolean).join('；') || null]
-  ];
-  body.innerHTML = rows.map(([k, v]) => `
-    <div class="snapshot-row">
-      <span class="snapshot-key">${k}</span>
-      <span class="snapshot-val ${v ? '' : 'empty'}">${v || '—'}</span>
-    </div>
-  `).join('');
-}
-
-// ═══════════════════════════════
-// 发送
-// ═══════════════════════════════
-function sendConfig() {
-  const str = buildConfigString();
-  if (!str) return;
-  // SillyTavern注入：找到输入框并触发发送
-  const input = document.querySelector('#send_textarea') ||
-                document.querySelector('textarea[placeholder]') ||
-                document.querySelector('#chat-input') ||
-                document.querySelector('.chat-input textarea');
-  if (input) {
-    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
-    nativeSetter.call(input, str);
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    setTimeout(() => {
-      const sendBtn = document.querySelector('#send_but') ||
-                      document.querySelector('[id*="send"]') ||
-                      document.querySelector('button[type="submit"]');
-      if (sendBtn) sendBtn.click();
-    }, 100);
-  } else {
-    // 降级：复制到剪贴板
-    navigator.clipboard.writeText(str).then(() => {
-      alert('配置已复制到剪贴板，请粘贴后发送：\n\n' + str);
-    });
+  var box=$id('conflictBox');var lst=$id('conflictList');
+  if(box&&lst){
+    if(msgs.length){box.classList.add('show');lst.innerHTML=msgs.map(function(m){return esc(m);}).join('<br>');}
+    else{box.classList.remove('show');lst.innerHTML='';}
   }
 }
 
-// ═══════════════════════════════
-// 清空
-// ═══════════════════════════════
-function clearAll() {
-  Object.keys(state).forEach(k => {
-    if (k === 'xp') state.xp.clear();
-    else state[k] = null;
+function updateProtoBadges(){
+  var acp=XP_DATA[8].on;var rhm=XP_DATA[9].on;var lgc=XP_DATA[10].on;
+  function setBadge(id,on){
+    var b=$id(id);var p=b&&b.closest('.proto');
+    if(!b)return;
+    b.textContent=on?'ACTIVE':'STANDBY';
+    b.className='proto-badge '+(on?'active':'standby');
+    if(p)p.style.borderLeftColor=on?'rgba(0,220,180,0.55)':'rgba(0,220,180,0.32)';
+  }
+  setBadge('badge-acp',acp);setBadge('badge-rhm',rhm);setBadge('badge-lgc',lgc);
+}
+
+function renderSettings(){
+  var sr=$id('settingRows');if(!sr)return;sr.innerHTML='';
+  SETTINGS.forEach(function(s,i){
+    var r=document.createElement('div');r.className='s-row';
+    r.innerHTML='<div class="s-row-l"><div class="s-row-t">'+esc(s.t)+'</div><div class="s-row-s">'+esc(s.s)+'</div></div><div class="sw'+(s.sw?' on':'')+'" onclick="this.classList.toggle(\'on\')"></div>';
+    sr.appendChild(r);
   });
-  state['world-custom'] = '';
-  state['char-custom'] = '';
-  state['xp-custom'] = '';
-  refreshAllSelections();
-  document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('selected'));
-  updatePreview();
 }
 
-// ═══════════════════════════════
-// 主题切换
-// ═══════════════════════════════
-function toggleTheme() {
-  document.body.classList.toggle('light');
+function renderChar(){
+  // Tags
+  var tc=$id('cTags');if(tc){tc.innerHTML='';CHAR.tags.forEach(function(t){var el=document.createElement('div');el.className='tag '+t[1];el.textContent=t[0];tc.appendChild(el);});}
+  // Stats
+  var sc=$id('cStats');
+  if(sc){
+    sc.innerHTML='';
+    CHAR.stats.forEach(function(s){
+      var r=document.createElement('div');r.className='stat-row';
+      r.innerHTML='<div class="s-lbl">'+esc(s[0])+'</div><div class="s-track"><div class="s-fill" style="width:0%;background:linear-gradient(90deg,'+esc(s[2])+','+esc(s[3])+');" data-w="'+s[1]+'%"></div></div><div class="s-val">'+esc(s[4])+'</div>';
+      sc.appendChild(r);
+    });
+    setTimeout(function(){document.querySelectorAll('.s-fill').forEach(function(el){el.style.width=el.getAttribute('data-w');});},300);
+  }
+  // Bio
+  var b=$id('cBio');if(b)b.textContent=CHAR.bio;
+  // Timeline
+  var tl=$id('cTimeline');
+  if(tl){
+    tl.innerHTML='';
+    CHAR.timeline.forEach(function(item,i){
+      var d=document.createElement('div');d.className='tl-item';
+      d.innerHTML='<div class="tl-l"><div class="tl-dot"></div>'+(i<CHAR.timeline.length-1?'<div class="tl-stem"></div>':'')+'</div><div><div class="tl-lbl">'+esc(item.lbl)+'</div><div class="tl-txt">'+esc(item.txt)+'</div></div>';
+      tl.appendChild(d);
+    });
+  }
+  setGDisp('叶青云','male');
 }
 
-// ═══════════════════════════════
-// 初始化
-// ═══════════════════════════════
-initPresets();
-initRadioGroups();
-initXPTags();
-initCustomInputs();
+/* ═══ GENDER ═══ */
+function switchG(type){
+  $id('gb-m').classList.toggle('on',type==='male');
+  $id('gb-f').classList.toggle('on',type==='female');
+  setGDisp(type==='male'?'叶青云':'叶清芸',type);
+}
+function setGDisp(name,type){
+  var el=$id('gDisp');if(!el)return;
+  var g=type==='male'?'linear-gradient(135deg,#5577ff,#0033cc)':'linear-gradient(135deg,#ff66aa,#aa0055)';
+  el.innerHTML='ACTIVE: <strong style="background:'+g+';-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">'+esc(name)+'</strong>';
+}
+
+/* ═══ MOOD ═══ */
+function updateMood(v){
+  var idx=Math.round((v/100)*(MOODS.length-1));
+  var el=$id('moodTxt');if(el)el.textContent=MOODS[idx];
+}
+
+/* ═══ TABS ═══ */
+document.getElementById('tabBar').addEventListener('click',function(e){
+  var tab=e.target.closest('.tab');if(!tab)return;
+  var p=tab.getAttribute('data-p');if(!p)return;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  tab.classList.add('on');
+  document.querySelectorAll('.page').forEach(function(pg){pg.classList.remove('on');});
+  var target=$id('pg-'+p);if(target)target.classList.add('on');
+});
+
+/* ═══ THEME ═══ */
+function setTheme(m){
+  document.body.classList.toggle('light',m==='light');
+  $id('btn-dark').classList.toggle('on',m==='dark');
+  $id('btn-light').classList.toggle('on',m==='light');
+}
+
+/* ═══ START ═══ */
+function doStart(){
+  var scene=SCENES.find(function(s){return s.on;});
+  var scName=scene?scene.t:'未设置';
+  var mood=$id('moodTxt').textContent;
+  var xpOn=XP_DATA.filter(function(x){return x.on;}).map(function(x){return x.l;});
+  var gender=$id('gb-m').classList.contains('on')?'叶青云（♂）':'叶清芸（♀）';
+  var conflicts=[];
+  CONFLICTS.forEach(function(c){if(XP_DATA[c[0]].on&&XP_DATA[c[1]].on)conflicts.push(c[2]);});
+
+  var cfg=[
+    '[SESSION INIT]',
+    '形态：'+gender,
+    '场景：'+scName,
+    '情绪：'+mood,
+    'XP：'+xpOn.join('、'),
+    conflicts.length?'⚠ 冲突项已确认：'+conflicts.map(function(c){return c.slice(0,12)+'…';}).join('；'):''
+  ].filter(Boolean).join(' · ');
+
+  // Try to inject into SillyTavern input
+  var inp=document.querySelector('#send_textarea')||document.querySelector('textarea[name="q"]')||document.querySelector('.qEdit textarea');
+  if(inp){
+    var nativeSetter=Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype,'value').set;
+    nativeSetter.call(inp,cfg);
+    inp.dispatchEvent(new Event('input',{bubbles:true}));
+    inp.dispatchEvent(new Event('change',{bubbles:true}));
+    var note=$id('startNote');
+    if(note){note.textContent='✓ 配置已注入输入框，确认发送即可';note.style.color='var(--c3)';}
+  } else {
+    // fallback: copy to clipboard
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(cfg).then(function(){
+        var note=$id('startNote');
+        if(note){note.textContent='✓ 配置已复制到剪贴板，粘贴后发送';note.style.color='var(--c3)';}
+      });
+    } else {
+      var note=$id('startNote');
+      if(note){note.textContent=cfg;note.style.color='var(--c1)';}
+    }
+  }
+  setTimeout(function(){
+    var note=$id('startNote');
+    if(note){note.textContent='完成配置后点击上方按钮 · 配置将注入叙事开场';note.style.color='';}
+  },5000);
+}
+
+/* ═══ CLOCK ═══ */
+function tick(){
+  var n=new Date();
+  var el=$id('sbTime');
+  if(el)el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+}
+setInterval(tick,10000);tick();
+
+/* ═══ INIT ═══ */
+renderScenes();
+renderXP();
+renderSettings();
+renderChar();
 </script>
 </body>
 </html>
 ```
-
----
