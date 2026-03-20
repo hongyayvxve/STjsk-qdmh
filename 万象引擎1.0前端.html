@@ -3,7 +3,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>A.U.T.O. SESSION INIT</title>
 <style>
 :root{
@@ -13,6 +13,7 @@
   --text0:rgba(165,225,255,0.92);--text1:rgba(105,185,225,0.70);--text2:rgba(65,145,185,0.50);
   --panel:rgba(8,18,36,0.96);
   --glow:0 0 14px rgba(0,200,255,0.22);
+  --vh:1vh;
 }
 body.light{
   --bg:#ccd8e8;--bg1:#d4dff0;--bg2:#c0cede;
@@ -23,8 +24,16 @@ body.light{
   --glow:0 0 10px rgba(0,80,130,0.18);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{height:100%;overflow:hidden;}
-body{height:100%;overflow:hidden;background:var(--bg);font-family:'Courier New',Consolas,monospace;}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: 'Courier New', Consolas, monospace;
+}
+
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,rgba(0,180,255,0.018) 0,rgba(0,180,255,0.018) 1px,transparent 1px,transparent 4px);
@@ -32,17 +41,25 @@ body::before{
 
 /* SHELL */
 .shell{
-  position:relative;z-index:1;
-  width:100%;height:100%;
-  display:flex;flex-direction:column;
-  overflow:hidden;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  height: calc(var(--vh, 1vh) * 100);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* STATUS BAR */
 .sb{
-  flex-shrink:0;padding:8px 16px;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(4,10,22,0.92);border-bottom:1px solid var(--border1);
+  flex-shrink: 0;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(4,10,22,0.92);
+  border-bottom: 1px solid var(--border1);
 }
 body.light .sb{background:rgba(195,218,240,0.92);}
 .sb-side{font-size:10px;color:var(--text2);letter-spacing:1px;}
@@ -50,10 +67,12 @@ body.light .sb{background:rgba(195,218,240,0.92);}
 .sb-dot{width:5px;height:5px;border-radius:50%;background:var(--c3);box-shadow:0 0 5px var(--c3);animation:bk 2s ease-in-out infinite;}
 @keyframes bk{0%,100%{opacity:.18}50%{opacity:1}}
 
-/* TABS — top */
+/* TABS */
 .tabs{
-  flex-shrink:0;display:flex;
-  background:rgba(4,10,22,0.97);border-bottom:1px solid var(--border1);
+  flex-shrink: 0;
+  display: flex;
+  background: rgba(4,10,22,0.97);
+  border-bottom: 1px solid var(--border1);
 }
 body.light .tabs{background:rgba(200,222,244,0.97);}
 .tab{
@@ -70,27 +89,37 @@ body.light .tabs{background:rgba(200,222,244,0.97);}
 .t-lbl{font-size:9px;color:var(--text2);letter-spacing:1.2px;text-transform:uppercase;transition:color .2s;}
 .tab.on .t-lbl{color:var(--c1);}
 
-/* PAGES CONTAINER */
+/* PAGES CONTAINER — 关键修复 */
 .pages{
-  flex:1;
-  min-height:0;
-  position:relative;
-  overflow:hidden;
+  flex: 1;
+  min-height: 0;      /* flex子项高度收缩修复 */
+  position: relative;
+  overflow: hidden;
 }
 
-/* INDIVIDUAL PAGE */
+/* INDIVIDUAL PAGE — 关键修复 */
 .page{
-  position:absolute;
-  top:0;right:0;bottom:0;left:0;
-  overflow-y:auto;
-  overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  opacity:0;
-  pointer-events:none;
-  transform:translateY(6px);
-  transition:opacity .18s,transform .18s;
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity .18s, transform .18s;
+  /* 隐藏滚动条但保留功能 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.page.on{opacity:1;pointer-events:auto;transform:translateY(0);}
+.page::-webkit-scrollbar{
+  display: none;
+}
+.page.on{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
 
 /* COMMON COMPONENTS */
 .ph{padding:14px 16px 12px;border-bottom:1px solid var(--border0);background:linear-gradient(150deg,rgba(0,55,100,0.14),transparent 70%);}
@@ -421,7 +450,7 @@ body.light .about{background:rgba(190,215,240,0.52);}
     <div class="card">
       <div class="dc-l" style="margin-bottom:6px;">PERCEPTION · 感知档案</div>
       <div style="font-size:12px;color:var(--text1);line-height:1.74;letter-spacing:.36px;">
-        感官、洞察力与直觉异常敏感——大脑天生功能异常发达，但病躯已难支持高功耗运转。过于复杂，世界上或许仅有数十人与之相同或类似。
+        感官、洞察力与直觉异常敏感——大脑天生功能异常发达，但病躯已难支持高功耗运转。过于复杂，世界上或许仅有数十人与之相同或类似，只能常常在角落里孤芳自赏。
       </div>
     </div>
   </div>
@@ -552,6 +581,14 @@ var CHAR={
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function $id(id){return document.getElementById(id);}
+
+/* ── vh修复：酒馆WebView中window.innerHeight更可靠 ── */
+function setVH(){
+  var vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', vh + 'px');
+}
+setVH();
+window.addEventListener('resize', setVH);
 
 function renderScenes(){
   var g=$id('scGrid');if(!g)return;g.innerHTML='';
@@ -733,3 +770,5 @@ renderChar();
 </body>
 </html>
 ```
+
+---
