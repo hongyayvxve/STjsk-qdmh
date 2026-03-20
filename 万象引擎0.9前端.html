@@ -1,0 +1,1300 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>幻境织梦</title>
+<style>
+/* ═══════════════════════════════════════
+   BASE RESET & VARIABLES
+═══════════════════════════════════════ */
+:root {
+  --p1: #ff1a8c;
+  --p2: #c040ff;
+  --p3: #ff80b3;
+  --p4: #e060ff;
+  --bg0: #0f0410;
+  --bg1: rgba(40,8,50,0.96);
+  --bg2: rgba(25,4,32,0.98);
+  --border: rgba(255,100,180,0.18);
+  --border-hi: rgba(255,100,180,0.4);
+  --text-hi: rgba(255,210,235,0.92);
+  --text-mid: rgba(255,170,210,0.65);
+  --text-lo: rgba(255,140,190,0.38);
+  --glass: rgba(255,50,140,0.06);
+  --tab-h: 58px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  font-family: -apple-system, 'Noto Sans SC', sans-serif;
+  background: transparent;        /* 手机壳外透明 */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════
+   PHONE SHELL — 仅限手机区域有背景
+═══════════════════════════════════════ */
+.phone {
+  width: 100%;
+  max-width: 390px;
+  min-height: 100svh;
+  background: var(--bg1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+/* ── 手机内部背景特效层 ── */
+.phone-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.phone-fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 40% at 20% 15%, rgba(255,50,150,0.09) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 85%, rgba(160,30,255,0.08) 0%, transparent 70%);
+}
+
+/* 粒子 */
+.fx-particle {
+  position: absolute;
+  border-radius: 50%;
+  animation: fxFloat linear infinite;
+  opacity: 0;
+}
+@keyframes fxFloat {
+  0%   { transform: translateY(100%) scale(0); opacity: 0; }
+  8%   { opacity: 1; }
+  90%  { opacity: 0.7; }
+  100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+}
+
+/* 扫光 */
+.phone-fx::after {
+  content: '';
+  position: absolute;
+  top: -200%;
+  left: -60%;
+  width: 50%;
+  height: 400%;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,120,180,0.04) 50%, transparent 60%);
+  animation: sweep 8s ease-in-out infinite;
+}
+@keyframes sweep {
+  0%,100% { left: -60%; }
+  50% { left: 120%; }
+}
+
+/* ═══════════════════════════════════════
+   STATUS BAR
+═══════════════════════════════════════ */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px 6px;
+  font-size: 11px;
+  color: var(--text-lo);
+  letter-spacing: 0.4px;
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   PAGE SYSTEM
+═══════════════════════════════════════ */
+.pages {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.page {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,100,180,0.25) transparent;
+  padding-bottom: calc(var(--tab-h) + 12px + var(--safe-bottom));
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.page::-webkit-scrollbar { width: 3px; }
+.page::-webkit-scrollbar-thumb { background: rgba(255,100,180,0.25); border-radius: 2px; }
+
+.page.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════
+   SHARED COMPONENTS
+═══════════════════════════════════════ */
+.sec { padding: 14px 18px; }
+.sec + .sec { padding-top: 0; }
+
+.sec-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--text-lo);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sec-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,100,180,0.18), transparent);
+}
+
+.divider {
+  height: 1px;
+  margin: 0 18px;
+  background: linear-gradient(90deg, transparent, rgba(255,100,180,0.2), rgba(180,0,255,0.15), transparent);
+}
+
+.card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+/* TAGS */
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 7px; }
+.tag {
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: default;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+}
+.tag:hover { transform: translateY(-2px) scale(1.05); }
+.tag-rose { background: rgba(255,50,130,0.13); border: 1px solid rgba(255,80,150,0.32); color: #ff95c5; }
+.tag-purple { background: rgba(180,0,255,0.1); border: 1px solid rgba(200,50,255,0.28); color: #d085ff; }
+.tag-teal { background: rgba(0,200,200,0.08); border: 1px solid rgba(0,200,200,0.22); color: #65d5d5; }
+.tag-gold { background: rgba(255,200,0,0.08); border: 1px solid rgba(255,200,0,0.22); color: #ffd560; }
+.tag-blue { background: rgba(80,120,255,0.1); border: 1px solid rgba(100,140,255,0.25); color: #90b0ff; }
+
+/* GRADIENT TEXT */
+.grad-text {
+  background: linear-gradient(135deg, var(--p3), var(--p2), var(--p1));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* TOGGLE SWITCH */
+.sw {
+  width: 36px; height: 20px;
+  background: rgba(255,100,180,0.12);
+  border: 1px solid rgba(255,100,180,0.22);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  flex-shrink: 0;
+}
+.sw::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: rgba(255,100,180,0.4);
+  transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+.sw.on {
+  background: linear-gradient(135deg, rgba(255,50,130,0.28), rgba(180,0,255,0.28));
+  border-color: rgba(255,100,180,0.5);
+}
+.sw.on::after {
+  left: 18px;
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  box-shadow: 0 0 8px rgba(255,50,150,0.5);
+}
+
+/* STAT BAR */
+.stat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.stat-row:last-child { margin-bottom: 0; }
+.stat-lbl { font-size: 11px; color: var(--text-lo); width: 52px; flex-shrink: 0; }
+.stat-track { flex: 1; height: 5px; background: rgba(255,100,180,0.07); border-radius: 3px; overflow: hidden; }
+.stat-fill {
+  height: 100%; border-radius: 3px;
+  position: relative;
+  transition: width 1.4s cubic-bezier(.22,1,.36,1);
+}
+.stat-fill::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  animation: shimmer 2.2s ease-in-out infinite;
+}
+@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(250%)} }
+.stat-val { font-size: 10px; color: var(--text-mid); width: 30px; text-align: right; flex-shrink: 0; font-weight: 600; }
+
+/* ═══════════════════════════════════════
+   PAGE 1 — HOME (CHAT)
+═══════════════════════════════════════ */
+.hero {
+  padding: 20px 18px 16px;
+  position: relative;
+  background: linear-gradient(160deg, rgba(255,50,150,0.1), rgba(180,0,255,0.06));
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -100%; left: -100%;
+  width: 300%; height: 300%;
+  background: conic-gradient(from 0deg at 50% 50%, transparent, rgba(255,100,180,0.025) 60deg, transparent 120deg, rgba(200,50,255,0.025) 180deg, transparent 240deg, rgba(255,100,180,0.02) 300deg, transparent);
+  animation: rotateFx 25s linear infinite;
+}
+@keyframes rotateFx { to { transform: rotate(360deg); } }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(90deg, rgba(255,80,160,0.18), rgba(180,0,255,0.18));
+  border: 1px solid rgba(255,100,180,0.3);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 10px; color: var(--text-mid);
+  letter-spacing: 0.8px; margin-bottom: 10px;
+}
+
+.hero-title {
+  font-size: 22px; font-weight: 700;
+  line-height: 1.25; margin-bottom: 5px;
+  position: relative;
+}
+
+.hero-sub { font-size: 11px; color: var(--text-lo); line-height: 1.65; }
+
+.hero-orb {
+  position: absolute; top: 18px; right: 18px;
+  width: 48px; height: 48px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(255,80,160,0.25), rgba(180,0,255,0.25));
+  border: 1px solid rgba(255,100,180,0.38);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  animation: orbPulse 3.5s ease-in-out infinite;
+}
+@keyframes orbPulse {
+  0%,100% { box-shadow: 0 0 18px rgba(255,80,160,0.18); }
+  50% { box-shadow: 0 0 32px rgba(255,80,160,0.38), 0 0 60px rgba(255,80,160,0.08); }
+}
+
+/* Chat bubbles */
+.chat-area { padding: 12px 18px 4px; }
+.bubble { display: flex; gap: 7px; margin-bottom: 9px; }
+.bubble.self { flex-direction: row-reverse; }
+.b-av {
+  width: 26px; height: 26px; border-radius: 9px; flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(255,80,160,0.25), rgba(180,0,255,0.25));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-mid);
+}
+.b-txt {
+  max-width: 72%;
+  padding: 8px 11px;
+  border-radius: 4px 13px 13px 13px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--text-hi);
+  line-height: 1.6;
+}
+.bubble.self .b-txt {
+  border-radius: 13px 4px 13px 13px;
+  background: linear-gradient(135deg, rgba(255,50,130,0.16), rgba(180,0,255,0.1));
+  border-color: rgba(255,100,180,0.24);
+}
+.typing { display: flex; align-items: center; gap: 4px; padding: 2px 4px; }
+.t-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,100,180,0.55);
+  animation: typeBounce 1.4s ease-in-out infinite;
+}
+.t-dot:nth-child(2){ animation-delay:.2s; }
+.t-dot:nth-child(3){ animation-delay:.4s; }
+@keyframes typeBounce {
+  0%,60%,100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Quick cmds */
+.quick-row {
+  display: flex; gap: 7px;
+  overflow-x: auto; padding: 0 18px 10px;
+  scrollbar-width: none;
+}
+.quick-row::-webkit-scrollbar { display: none; }
+.qcmd {
+  flex-shrink: 0; padding: 5px 13px;
+  border-radius: 20px;
+  background: rgba(255,50,130,0.07);
+  border: 1px solid rgba(255,100,180,0.16);
+  color: var(--text-mid);
+  font-size: 11px; cursor: pointer;
+  transition: all 0.22s; white-space: nowrap;
+  font-family: inherit;
+}
+.qcmd:hover {
+  background: rgba(255,50,130,0.14);
+  border-color: rgba(255,100,180,0.34);
+  color: var(--text-hi);
+  transform: translateY(-1px);
+}
+
+/* Input */
+.input-bar {
+  padding: 8px 18px calc(8px + var(--safe-bottom));
+  display: flex; gap: 9px; align-items: flex-end;
+  /* 固定在底部tab之上 — 这里通过页面padding-bottom处理 */
+}
+.input-tx {
+  flex: 1; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,100,180,0.2);
+  border-radius: 18px; padding: 10px 14px;
+  color: var(--text-hi); font-size: 13px;
+  font-family: inherit; outline: none; resize: none;
+  min-height: 42px; max-height: 110px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  line-height: 1.5;
+}
+.input-tx::placeholder { color: rgba(255,140,190,0.28); }
+.input-tx:focus {
+  border-color: rgba(255,100,180,0.48);
+  box-shadow: 0 0 0 3px rgba(255,80,160,0.08);
+}
+.send-btn {
+  width: 42px; height: 42px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: white; font-size: 16px; cursor: pointer;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 14px rgba(255,50,150,0.32);
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
+}
+.send-btn:hover { transform: scale(1.1) rotate(8deg); box-shadow: 0 5px 20px rgba(255,50,150,0.5); }
+.send-btn:active { transform: scale(0.92); }
+
+/* ═══════════════════════════════════════
+   PAGE 2 — WORLD BOOK (世界书)
+═══════════════════════════════════════ */
+.world-header {
+  padding: 18px 18px 10px;
+  background: linear-gradient(160deg, rgba(150,0,255,0.09), rgba(255,0,130,0.06));
+}
+.world-title { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+.world-sub { font-size: 11px; color: var(--text-lo); }
+
+/* World categories */
+.wcat { margin-bottom: 4px; }
+.wcat-title {
+  font-size: 10px; letter-spacing: 1.5px;
+  color: rgba(255,120,180,0.38); text-transform: uppercase;
+  padding: 10px 18px 5px; font-weight: 600;
+}
+.wentry {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px; cursor: pointer;
+  border-bottom: 1px solid rgba(255,100,180,0.06);
+  transition: background 0.2s, padding-left 0.2s;
+  position: relative;
+}
+.wentry::before {
+  content: '';
+  position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 2px; border-radius: 0 2px 2px 0;
+  background: linear-gradient(180deg, var(--p1), var(--p2));
+  opacity: 0; transition: opacity 0.2s;
+}
+.wentry:hover { background: rgba(255,80,160,0.05); padding-left: 22px; }
+.wentry:hover::before, .wentry.on::before { opacity: 1; }
+.wentry.on { background: rgba(255,80,160,0.07); }
+.w-ico {
+  width: 30px; height: 30px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.w-info { flex: 1; min-width: 0; }
+.w-name { font-size: 12px; font-weight: 500; color: var(--text-hi); }
+.w-desc { font-size: 10px; color: var(--text-lo); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ═══════════════════════════════════════
+   PAGE 3 — XP / SCENE SELECTION
+═══════════════════════════════════════ */
+.xp-header {
+  padding: 18px 18px 10px;
+  background: linear-gradient(160deg, rgba(255,50,100,0.09), rgba(200,0,255,0.06));
+}
+.xp-title { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+.xp-sub { font-size: 11px; color: var(--text-lo); }
+
+.xp-section { padding: 12px 18px; }
+
+/* Mood slider */
+.mood-wrap { margin-bottom: 14px; }
+.mood-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px; border-radius: 2px; outline: none; cursor: pointer;
+  background: linear-gradient(90deg, rgba(255,50,130,0.7), rgba(180,0,255,0.7));
+}
+.mood-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(255,80,160,0.18), 0 3px 10px rgba(255,50,150,0.35);
+  transition: transform 0.2s;
+}
+.mood-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.mood-ends { display: flex; justify-content: space-between; margin-top: 6px; }
+.mood-end { font-size: 10px; color: var(--text-lo); }
+.mood-current {
+  text-align: center; margin-top: 4px;
+  font-size: 11px; color: var(--text-mid); letter-spacing: 0.5px;
+}
+
+/* Scene grid */
+.scene-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.sc-card {
+  background: rgba(255,50,130,0.05);
+  border: 1px solid rgba(255,100,180,0.11);
+  border-radius: 14px; padding: 13px 11px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+  position: relative; overflow: hidden;
+}
+.sc-card:hover {
+  background: rgba(255,50,130,0.1);
+  border-color: rgba(255,100,180,0.28);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,50,150,0.12);
+}
+.sc-card.sel {
+  background: linear-gradient(135deg, rgba(255,50,130,0.16), rgba(180,0,255,0.12));
+  border-color: rgba(255,100,180,0.42);
+  box-shadow: 0 0 0 1px rgba(255,100,180,0.18), 0 6px 20px rgba(255,50,150,0.18);
+}
+.sc-em { font-size: 18px; margin-bottom: 5px; display: block; }
+.sc-title { font-size: 12px; font-weight: 600; color: var(--text-hi); margin-bottom: 2px; }
+.sc-sub { font-size: 10px; color: var(--text-lo); }
+
+/* XP toggles */
+.xp-list { display: flex; flex-direction: column; gap: 1px; }
+.xp-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid rgba(255,100,180,0.06);
+  cursor: pointer;
+}
+.xp-item:last-child { border-bottom: none; }
+.xp-ico { font-size: 14px; width: 22px; text-align: center; flex-shrink: 0; }
+.xp-label { flex: 1; font-size: 12px; color: var(--text-mid); }
+.xp-sub-label { display: block; font-size: 10px; color: var(--text-lo); margin-top: 1px; }
+
+/* ═══════════════════════════════════════
+   PAGE 4 — CHARACTER (角色)
+   DATA-DRIVEN: reads from CHAR_DATA object
+═══════════════════════════════════════ */
+.char-header {
+  padding: 18px 18px 12px;
+  background: linear-gradient(160deg, rgba(255,80,160,0.1), rgba(150,0,255,0.07));
+  position: relative; overflow: hidden;
+}
+.char-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(90deg, rgba(255,80,160,0.16), rgba(180,0,255,0.16));
+  border: 1px solid rgba(255,100,180,0.28);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 10px; color: var(--text-mid); letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+.char-name { font-size: 22px; font-weight: 700; margin-bottom: 3px; }
+.char-alias { font-size: 11px; color: var(--text-lo); }
+
+.char-orb {
+  position: absolute; top: 16px; right: 16px;
+  width: 50px; height: 50px; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,80,160,0.22), rgba(180,0,255,0.22));
+  border: 1px solid rgba(255,100,180,0.35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  animation: orbPulse 4s ease-in-out infinite;
+}
+
+/* Gender switcher */
+.g-switch {
+  background: rgba(255,50,150,0.05);
+  border: 1px solid var(--border);
+  border-radius: 18px; padding: 13px;
+}
+.g-toggle { display: flex; background: rgba(0,0,0,0.28); border-radius: 12px; padding: 3px; gap: 3px; }
+.g-btn {
+  flex: 1; padding: 9px; border: none; border-radius: 9px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  font-family: inherit;
+  transition: all 0.35s cubic-bezier(.34,1.56,.64,1);
+}
+.g-btn.male { background: transparent; color: rgba(150,180,255,0.45); }
+.g-btn.male.act {
+  background: linear-gradient(135deg, #2a3d80, #1a50c0);
+  color: #a0c0ff;
+  box-shadow: 0 3px 16px rgba(50,100,255,0.28);
+}
+.g-btn.female { background: transparent; color: rgba(255,150,200,0.45); }
+.g-btn.female.act {
+  background: linear-gradient(135deg, #b00d5a, #ff1080);
+  color: #ffc0e0;
+  box-shadow: 0 3px 16px rgba(255,50,150,0.38);
+}
+.g-display {
+  text-align: center; margin-top: 10px;
+  font-size: 12px; color: var(--text-lo);
+}
+.g-display strong {
+  font-size: 17px; font-weight: 700; margin-left: 6px;
+}
+
+/* ═══════════════════════════════════════
+   PAGE 5 — SETTINGS
+═══════════════════════════════════════ */
+.settings-header {
+  padding: 18px 18px 10px;
+  background: linear-gradient(160deg, rgba(100,50,255,0.08), rgba(255,0,150,0.05));
+}
+.settings-title { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+.settings-sub { font-size: 11px; color: var(--text-lo); }
+
+.srow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255,100,180,0.06);
+}
+.srow-l { flex: 1; }
+.srow-title { font-size: 12px; font-weight: 500; color: var(--text-hi); }
+.srow-sub { font-size: 10px; color: var(--text-lo); margin-top: 2px; }
+
+.about-card {
+  margin: 12px 18px;
+  padding: 14px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  text-align: center;
+}
+.about-icon { font-size: 28px; margin-bottom: 6px; }
+.about-name { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.about-ver { font-size: 10px; color: var(--text-lo); }
+
+/* ═══════════════════════════════════════
+   BOTTOM TAB BAR
+═══════════════════════════════════════ */
+.tab-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: calc(var(--tab-h) + var(--safe-bottom));
+  display: flex;
+  background: rgba(12,3,18,0.92);
+  border-top: 1px solid rgba(255,100,180,0.12);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+  padding-bottom: var(--safe-bottom);
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer;
+  position: relative; transition: all 0.22s;
+}
+.tab::before {
+  content: '';
+  position: absolute; top: 0;
+  width: 24px; height: 2px; border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, var(--p1), var(--p2));
+  opacity: 0; transition: opacity 0.22s;
+}
+.tab.act::before { opacity: 1; }
+.tab-icon {
+  font-size: 19px;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  filter: grayscale(0.6) opacity(0.6);
+}
+.tab.act .tab-icon { transform: scale(1.15); filter: none; }
+.tab-label { font-size: 9px; color: rgba(255,150,190,0.32); letter-spacing: 0.4px; transition: color 0.22s; }
+.tab.act .tab-label { color: var(--text-mid); }
+
+/* Notification dot */
+.n-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--p1); box-shadow: 0 0 5px rgba(255,26,140,0.7);
+  display: inline-block; margin-left: 4px; vertical-align: middle;
+  animation: ndot 2s ease-in-out infinite;
+}
+@keyframes ndot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:.7} }
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(16px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.fu { animation: fadeUp 0.4s ease both; }
+.fu:nth-child(1){animation-delay:.05s}
+.fu:nth-child(2){animation-delay:.1s}
+.fu:nth-child(3){animation-delay:.15s}
+.fu:nth-child(4){animation-delay:.2s}
+.fu:nth-child(5){animation-delay:.25s}
+.fu:nth-child(6){animation-delay:.3s}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <!-- 背景特效层 -->
+  <div class="phone-fx" id="phoneFx"></div>
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="background:linear-gradient(135deg,#ff80b3,#c040ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:600;letter-spacing:1px;">✦ 幻境织梦</span>
+    <span>🔋</span>
+  </div>
+
+  <!-- ════════════ PAGES ════════════ -->
+  <div class="pages">
+
+    <!-- ── PAGE 1: 主页/对话 ── -->
+    <div class="page active" id="page-home">
+      <!-- Hero -->
+      <div class="hero fu">
+        <div class="hero-badge">✦ <span id="h-badge-text">叶青云 · 神女血脉</span></div>
+        <h1 class="hero-title grad-text" id="h-title">世界织造台</h1>
+        <p class="hero-sub" id="h-sub">在叙事的边界之外<br>每一个选择都构成新的真实</p>
+        <div class="hero-orb">✧</div>
+      </div>
+
+      <div class="divider" style="margin-top:2px;"></div>
+
+      <!-- Chat preview -->
+      <div class="chat-area fu" id="chatArea">
+        <div class="bubble">
+          <div class="b-av">✧</div>
+          <div class="b-txt">世界在你的感知中流动，每个细节都如刀刻。今晚以何种姿态开始？</div>
+        </div>
+        <div class="bubble self">
+          <div class="b-av">叶</div>
+          <div class="b-txt">以叶青云的视角，进入命运交汇。</div>
+        </div>
+        <div class="bubble">
+          <div class="b-av">✧</div>
+          <div class="b-txt"><div class="typing"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div></div>
+        </div>
+      </div>
+
+      <!-- Quick commands -->
+      <div class="quick-row fu">
+        <button class="qcmd" onclick="insertQ(this)">切换形态</button>
+        <button class="qcmd" onclick="insertQ(this)">场景推进</button>
+        <button class="qcmd" onclick="insertQ(this)">角色独白</button>
+        <button class="qcmd" onclick="insertQ(this)">感官描写</button>
+        <button class="qcmd" onclick="insertQ(this)">情绪特写</button>
+        <button class="qcmd" onclick="insertQ(this)">命运节点</button>
+      </div>
+
+      <!-- Input -->
+      <div class="input-bar fu">
+        <textarea class="input-tx" id="mainInput" rows="1" placeholder="输入对话或指令…" oninput="autoH(this)"></textarea>
+        <button class="send-btn" onclick="sendMsg()">✦</button>
+      </div>
+    </div>
+
+    <!-- ── PAGE 2: 世界书 ── -->
+    <div class="page" id="page-world">
+      <div class="world-header fu">
+        <div style="font-size:10px;color:var(--text-lo);letter-spacing:1.5px;margin-bottom:6px;">WORLD BOOK</div>
+        <div class="world-title grad-text">世界法则</div>
+        <div class="world-sub">激活的条目将在叙事中自动生效</div>
+      </div>
+
+      <div id="worldEntries"></div><!-- 由JS生成 -->
+    </div>
+
+    <!-- ── PAGE 3: XP & 场景 ── -->
+    <div class="page" id="page-xp">
+      <div class="xp-header fu">
+        <div style="font-size:10px;color:var(--text-lo);letter-spacing:1.5px;margin-bottom:6px;">SCENE &amp; XP</div>
+        <div class="xp-title grad-text">场景与偏好</div>
+        <div class="xp-sub">配置叙事风格与核心偏好</div>
+      </div>
+
+      <!-- Mood -->
+      <div class="xp-section fu">
+        <div class="sec-label">情绪基调</div>
+        <div class="mood-wrap">
+          <input type="range" class="mood-slider" min="0" max="100" value="55" oninput="updateMood(this.value)">
+          <div class="mood-ends">
+            <span class="mood-end">🌑 低沉</span>
+            <span class="mood-end">✨ 明朗</span>
+          </div>
+          <div class="mood-current" id="moodTxt">· 冷静稳定 ·</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Scene selection -->
+      <div class="xp-section fu">
+        <div class="sec-label">场景设定</div>
+        <div class="scene-grid" id="sceneGrid"></div><!-- JS生成 -->
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- XP toggles -->
+      <div class="xp-section fu">
+        <div class="sec-label">XP 偏好配置</div>
+        <div class="xp-list" id="xpList"></div><!-- JS生成 -->
+      </div>
+    </div>
+
+    <!-- ── PAGE 4: 角色 ── -->
+    <div class="page" id="page-char">
+      <div class="char-header fu">
+        <div class="char-badge">✦ <span id="c-badge"></span></div>
+        <div class="char-name grad-text" id="c-name"></div>
+        <div class="char-alias" id="c-alias"></div>
+        <div class="char-orb" id="c-orb">✧</div>
+      </div>
+
+      <!-- Gender switcher -->
+      <div class="sec fu" id="genderSec" style="display:none;">
+        <div class="sec-label">当前形态</div>
+        <div class="g-switch">
+          <div class="g-toggle" id="gToggle"></div>
+          <div class="g-display" id="gDisplay"></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Tags -->
+      <div class="sec fu">
+        <div class="sec-label">角色特质</div>
+        <div class="tag-cloud" id="c-tags"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Stats -->
+      <div class="sec fu">
+        <div class="sec-label">核心属性</div>
+        <div id="c-stats"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Bio -->
+      <div class="sec fu">
+        <div class="sec-label">角色概述</div>
+        <div class="card">
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.75;" id="c-bio"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PAGE 5: 设定 ── -->
+    <div class="page" id="page-settings">
+      <div class="settings-header fu">
+        <div style="font-size:10px;color:var(--text-lo);letter-spacing:1.5px;margin-bottom:6px;">SETTINGS</div>
+        <div class="settings-title grad-text">系统设定</div>
+        <div class="settings-sub">配置叙事引擎参数</div>
+      </div>
+
+      <div id="settingRows"></div><!-- JS生成 -->
+
+      <div class="about-card fu">
+        <div class="about-icon">✦</div>
+        <div class="about-name grad-text" id="app-title-about">幻境织梦</div>
+        <div class="about-ver" id="app-ver">v2.0 · A.U.T.O. 驱动</div>
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- ════════════ TAB BAR ════════════ -->
+  <div class="tab-bar">
+    <div class="tab act" data-page="home" onclick="goTab(this)">
+      <span class="tab-icon">💬</span>
+      <span class="tab-label">对话</span>
+    </div>
+    <div class="tab" data-page="world" onclick="goTab(this)">
+      <span class="tab-icon">📖</span>
+      <span class="tab-label">世界书</span>
+    </div>
+    <div class="tab" data-page="xp" onclick="goTab(this)">
+      <span class="tab-icon">🌸</span>
+      <span class="tab-label">场景XP</span>
+    </div>
+    <div class="tab" data-page="char" onclick="goTab(this)">
+      <span class="tab-icon">✦</span>
+      <span class="tab-label">角色</span>
+    </div>
+    <div class="tab" data-page="settings" onclick="goTab(this)">
+      <span class="tab-icon">⚙️</span>
+      <span class="tab-label">设定</span>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CHAR_DATA — 数据源
+   ★ 此对象是外部注入接口：
+     可通过正则 / 脚本 / SillyTavern扩展替换此对象内容
+     替换后调用 window.REBIND && REBIND() 刷新UI
+   ★ 字段说明见各字段注释
+═══════════════════════════════════════════════════════════ */
+var CHAR_DATA = {
+  /* 基本身份 */
+  name:        "叶青云",          // 主名
+  altName:     "叶清芸",          // 别名（女性形态，可为null/""则不显示性别切换）
+  altLabel:    "女性形态",        // 别名说明
+  badge:       "神女血脉 · 双重血统",
+  appTitle:    "幻境织梦",
+  appVer:      "v2.0 · A.U.T.O. 驱动",
+
+  /* 头部副标题 */
+  heroBadge:   "叶青云 · 神女血脉",
+  heroTitle:   "世界织造台",
+  heroSub:     "在叙事的边界之外\n每一个选择都构成新的真实",
+
+  /* 英雄区显示名/别名 */
+  orb:         "✧",
+
+  /* 性别切换文案（altName存在时才显示） */
+  gender: {
+    maleName:  "叶青云",
+    femaleName:"叶清芸",
+    maleLabel: "♂ 叶青云",
+    femaleLabel:"♀ 叶清芸"
+  },
+
+  /* 角色简介 */
+  bio: "同时拥有人类与神女血脉，无人知晓的双重来源赋予其无固定性别的能力——在数秒内自由转换男女形态。超高智商（150+）的高功能双向情感障碍终身患者，病龄十年，仅凭天生擅长的元认知训练维系稳定。感官、洞察力与直觉异常敏感；容貌宛若神赐，男性俊朗深沉，女性柔美淡雅。INTP · 摩羯，开朗却敏感，冷静而独特，世界上与其相似者或许不超过数十人。",
+
+  /* 属性标签 [文本, 颜色类] */
+  tags: [
+    ["✦ 神女血脉",    "tag-gold"],
+    ["IQ 150+",       "tag-rose"],
+    ["INTP · 摩羯",   "tag-purple"],
+    ["双向情感障碍",  "tag-teal"],
+    ["元认知训练",    "tag-rose"],
+    ["超感洞察",      "tag-purple"],
+    ["孤芳自赏者",    "tag-gold"],
+    ["性别流动",      "tag-blue"]
+  ],
+
+  /* 属性条 [名称, 百分比, 渐变色A, 渐变色B, 显示文本] */
+  stats: [
+    ["智慧",  96, "#ff40a0","#ff80d0", "150+"],
+    ["洞察",  91, "#a040ff","#d080ff", "极强"],
+    ["魅力",  88, "#ff6040","#ff9070", "天赋"],
+    ["耐韧",  72, "#40a0ff","#80c0ff", "磨损"],
+    ["外貌",  98, "#ff40c0","#ff80e0", "神赐"]
+  ],
+
+  /* 世界书条目 */
+  worldBook: [
+    {
+      cat: "感官与心理",
+      entries: [
+        { ico:"👁️", name:"偷窥破心锤",    desc:"隐秘观察引发的心防崩塌机制",       on:true,  bg:"rgba(255,80,160,0.12)" },
+        { ico:"🤫", name:"默契",           desc:"可做不可说的无声共识",              on:false, bg:"rgba(180,0,255,0.12)" },
+        { ico:"🎭", name:"伪平然",         desc:"日常掩护下的越界暗流",              on:false, bg:"rgba(255,150,50,0.12)" },
+        { ico:"🌫️", name:"蒙眼",           desc:"视觉剥夺强化其余感官",              on:false, bg:"rgba(50,200,200,0.12)" }
+      ]
+    },
+    {
+      cat: "关系与动态",
+      entries: [
+        { ico:"♟️", name:"奖励机制",       desc:"付出与索偿的渐进瓦解",              on:false, bg:"rgba(255,80,160,0.12)" },
+        { ico:"👑", name:"国王游戏",       desc:"权力抽签与渐进指令",                on:true,  bg:"rgba(180,0,255,0.12)" },
+        { ico:"💎", name:"禁忌关系增强",   desc:"背德感驱动的心理博弈",              on:false, bg:"rgba(255,200,0,0.1)"  },
+        { ico:"🪞", name:"反差婊",         desc:"双面性格的极端反差",                on:false, bg:"rgba(0,200,150,0.1)"  }
+      ]
+    },
+    {
+      cat: "特殊能力",
+      entries: [
+        { ico:"🌀", name:"肢体控制伪催眠", desc:"意识清醒 · 肢体隐秘控制",          on:false, bg:"rgba(100,100,255,0.12)" },
+        { ico:"⚡", name:"意识共享感官融合",desc:"感官共鸣链接 · 实时体验",          on:false, bg:"rgba(255,50,80,0.12)"  },
+        { ico:"🔮", name:"心理印刻",       desc:"感官-条件反射深层绑定",             on:false, bg:"rgba(255,200,50,0.1)"  },
+        { ico:"🎵", name:"声音控制",       desc:"非语言声音建立条件反射弧",          on:false, bg:"rgba(180,0,255,0.15)"  }
+      ]
+    },
+    {
+      cat: "世界法则",
+      entries: [
+        { ico:"💞", name:"普世母爱",       desc:"所有女性本能视其为孩子",            on:true,  bg:"rgba(255,100,160,0.15)" },
+        { ico:"🌹", name:"人形媚药",       desc:"被动散发的强效信息素场",            on:false, bg:"rgba(255,150,0,0.1)"   },
+        { ico:"💎", name:"绝对拥护",       desc:"无保留的赞美与鼓励模式",            on:false, bg:"rgba(100,200,255,0.1)"  }
+      ]
+    }
+  ],
+
+  /* 场景 */
+  scenes: [
+    { em:"🌙", title:"深夜独白", sub:"私密 · 内省", sel:true  },
+    { em:"⚔️", title:"暗流角力", sub:"张力 · 对峙", sel:false },
+    { em:"🌸", title:"初识微妙", sub:"暧昧 · 试探", sel:false },
+    { em:"🔮", title:"命运交汇", sub:"神秘 · 宿命", sel:false },
+    { em:"🫀", title:"情感拉锯", sub:"矛盾 · 纠葛", sel:false },
+    { em:"✦",  title:"自定义",   sub:"自由 · 创造", sel:false }
+  ],
+
+  /* XP偏好 */
+  xpItems: [
+    { ico:"🧠", label:"心理张力优先",     sub:"侧重内心博弈而非外在行为",        on:true  },
+    { ico:"✨", label:"感官细节描写",     sub:"强调触感/声音/光影的具象化",      on:true  },
+    { ico:"🌊", label:"慢热渐进叙事",     sub:"节奏克制，张力在细节中积累",      on:false },
+    { ico:"💫", label:"神女血脉显化",     sub:"允许超自然感知能力被觉察",        on:false },
+    { ico:"🎭", label:"双重身份张力",     sub:"男女形态切换作为叙事核心",        on:false },
+    { ico:"🩸", label:"情绪崩溃可写",     sub:"允许双向情感障碍发作的真实描绘",  on:false },
+    { ico:"🔒", label:"边界提示",         sub:"超出设定时以叙事内方式提示",      on:true  },
+    { ico:"📐", label:"严格人设模式",     sub:"角色决策优先遵从既有人设逻辑",    on:true  }
+  ],
+
+  /* 系统设定行 */
+  settings: [
+    { title:"叙事视角",    sub:"叶青云第一/第三人称",  sw:true  },
+    { title:"元叙事提示",  sub:"允许A.U.T.O.跳出角色说明",sw:false },
+    { title:"感官美学强化",sub:"启用<Aesthetic_Core_Protocol>",sw:true  },
+    { title:"阶级材质渲染",sub:"启用<Resource_Hierarchy_Matrix>",sw:false},
+    { title:"情绪基调锁定",sub:"固定情绪不随叙事漂移",  sw:false },
+    { title:"自动场景过渡",sub:"{{char}}可主动切换场景",  sw:true  }
+  ]
+};
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER ENGINE
+═══════════════════════════════════════════════════════════ */
+function renderAll() {
+  var D = CHAR_DATA;
+
+  /* ── Hero text ── */
+  setText("h-badge-text", D.heroBadge);
+  setText("h-title", D.heroTitle);
+  var heroSub = document.getElementById("h-sub");
+  if(heroSub) heroSub.innerHTML = D.heroSub.replace(/\n/g,"<br>");
+
+  /* ── App meta ── */
+  setText("app-title-about", D.appTitle);
+  setText("app-ver", D.appVer);
+
+  /* ── Character page ── */
+  setText("c-badge", D.badge);
+  setText("c-name", D.name + (D.altName ? " / " + D.altName : ""));
+  setText("c-alias", D.altName ? (D.altLabel || "别名") + "：" + D.altName : "");
+  setText("c-bio", D.bio);
+
+  var orbEl = document.getElementById("c-orb");
+  if(orbEl) orbEl.textContent = D.orb || "✧";
+
+  /* Gender switch */
+  var gSec = document.getElementById("genderSec");
+  if(D.altName) {
+    gSec.style.display = "";
+    buildGenderSwitch(D);
+  } else {
+    gSec.style.display = "none";
+  }
+
+  /* Tags */
+  var tagContainer = document.getElementById("c-tags");
+  if(tagContainer) {
+    tagContainer.innerHTML = "";
+    (D.tags||[]).forEach(function(t) {
+      var el = document.createElement("div");
+      el.className = "tag " + t[1];
+      el.textContent = t[0];
+      tagContainer.appendChild(el);
+    });
+  }
+
+  /* Stats */
+  var statContainer = document.getElementById("c-stats");
+  if(statContainer) {
+    statContainer.innerHTML = "";
+    (D.stats||[]).forEach(function(s) {
+      var row = document.createElement("div");
+      row.className = "stat-row";
+      row.innerHTML =
+        '<div class="stat-lbl">'+esc(s[0])+'</div>'+
+        '<div class="stat-track"><div class="stat-fill" style="width:0%;background:linear-gradient(90deg,'+s[2]+','+s[3]+');" data-w="'+s[1]+'%"></div></div>'+
+        '<div class="stat-val">'+esc(s[4])+'</div>';
+      statContainer.appendChild(row);
+    });
+    /* animate */
+    setTimeout(function() {
+      document.querySelectorAll(".stat-fill").forEach(function(el) {
+        el.style.width = el.getAttribute("data-w");
+      });
+    }, 120);
+  }
+
+  /* ── World book ── */
+  var we = document.getElementById("worldEntries");
+  if(we) {
+    we.innerHTML = "";
+    (D.worldBook||[]).forEach(function(cat) {
+      var cEl = document.createElement("div");
+      cEl.className = "wcat";
+      var tEl = document.createElement("div");
+      tEl.className = "wcat-title";
+      tEl.innerHTML = "── " + esc(cat.cat) + " ──";
+      cEl.appendChild(tEl);
+      (cat.entries||[]).forEach(function(e) {
+        var en = document.createElement("div");
+        en.className = "wentry" + (e.on ? " on" : "");
+        en.innerHTML =
+          '<div class="w-ico" style="background:'+e.bg+'">'+e.ico+'</div>'+
+          '<div class="w-info">'+
+            '<div class="w-name">'+esc(e.name)+'</div>'+
+            '<div class="w-desc">'+esc(e.desc)+'</div>'+
+          '</div>'+
+          '<div class="sw'+(e.on?" on":"")+'" onclick="swToggle(this,event)"></div>';
+        en.addEventListener("click", function() { en.classList.toggle("on"); });
+        cEl.appendChild(en);
+      });
+      we.appendChild(cEl);
+    });
+  }
+
+  /* ── Scenes ── */
+  var sg = document.getElementById("sceneGrid");
+  if(sg) {
+    sg.innerHTML = "";
+    (D.scenes||[]).forEach(function(s) {
+      var card = document.createElement("div");
+      card.className = "sc-card" + (s.sel ? " sel" : "");
+      card.innerHTML =
+        '<span class="sc-em">'+s.em+'</span>'+
+        '<div class="sc-title">'+esc(s.title)+'</div>'+
+        '<div class="sc-sub">'+esc(s.sub)+'</div>';
+      card.addEventListener("click", function() {
+        document.querySelectorAll(".sc-card").forEach(function(c){ c.classList.remove("sel"); });
+        card.classList.add("sel");
+      });
+      sg.appendChild(card);
+    });
+  }
+
+  /* ── XP list ── */
+  var xl = document.getElementById("xpList");
+  if(xl) {
+    xl.innerHTML = "";
+    (D.xpItems||[]).forEach(function(x) {
+      var item = document.createElement("div");
+      item.className = "xp-item";
+      item.innerHTML =
+        '<span class="xp-ico">'+x.ico+'</span>'+
+        '<span class="xp-label">'+esc(x.label)+
+          (x.sub ? '<span class="xp-sub-label">'+esc(x.sub)+'</span>' : '')+
+        '</span>'+
+        '<div class="sw'+(x.on?" on":"")+'" onclick="swToggle(this,event)"></div>';
+      xl.appendChild(item);
+    });
+  }
+
+  /* ── Settings ── */
+  var settingContainer = document.getElementById("settingRows");
+  if(settingContainer) {
+    settingContainer.innerHTML = "";
+    (D.settings||[]).forEach(function(s) {
+      var row = document.createElement("div");
+      row.className = "srow";
+      row.innerHTML =
+        '<div class="srow-l">'+
+          '<div class="srow-title">'+esc(s.title)+'</div>'+
+          (s.sub ? '<div class="srow-sub">'+esc(s.sub)+'</div>' : '')+
+        '</div>'+
+        '<div class="sw'+(s.sw?" on":"")+'" onclick="swToggle(this,event)"></div>';
+      settingContainer.appendChild(row);
+    });
+  }
+}
+
+function buildGenderSwitch(D) {
+  var tog = document.getElementById("gToggle");
+  var dis = document.getElementById("gDisplay");
+  if(!tog||!dis) return;
+  var g = D.gender;
+  tog.innerHTML =
+    '<button class="g-btn male act" onclick="switchG(\'male\',this)">'+esc(g.maleLabel)+'</button>'+
+    '<button class="g-btn female" onclick="switchG(\'female\',this)">'+esc(g.femaleLabel)+'</button>';
+  setGDisplay(g.maleName, "male");
+}
+
+var _currentGender = "male";
+function switchG(type, btn) {
+  _currentGender = type;
+  var D = CHAR_DATA;
+  document.querySelectorAll(".g-btn").forEach(function(b){ b.classList.remove("act"); });
+  btn.classList.add("act");
+  var name = type==="male" ? D.gender.maleName : D.gender.femaleName;
+  setGDisplay(name, type);
+}
+
+function setGDisplay(name, type) {
+  var dis = document.getElementById("gDisplay");
+  if(!dis) return;
+  var color = type==="male"
+    ? "linear-gradient(135deg,#80a0ff,#4060ff)"
+    : "linear-gradient(135deg,#ff80b3,#c040ff)";
+  dis.innerHTML = '当前：<strong style="background:'+color+';-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">'+esc(name)+'</strong>';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAB NAVIGATION
+═══════════════════════════════════════════════════════════ */
+function goTab(tabEl) {
+  var pageName = tabEl.getAttribute("data-page");
+  document.querySelectorAll(".tab").forEach(function(t){ t.classList.remove("act"); });
+  tabEl.classList.add("act");
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+  var target = document.getElementById("page-"+pageName);
+  if(target) target.classList.add("active");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════ */
+function swToggle(el, event) {
+  if(event) event.stopPropagation();
+  el.classList.toggle("on");
+}
+
+function setText(id, val) {
+  var el = document.getElementById(id);
+  if(el) el.textContent = val || "";
+}
+
+function esc(str) {
+  if(!str) return "";
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+/* Mood labels */
+var MOODS = ["·深度低沉·","·忧郁黯淡·","·压抑苦闷·","·隐隐不安·","·冷静稳定·","·微有起伏·","·轻松明快·","·情绪高涨·","·灿烂明朗·"];
+function updateMood(v) {
+  var idx = Math.round((v/100)*(MOODS.length-1));
+  setText("moodTxt", MOODS[idx]);
+}
+
+/* Chat */
+function insertQ(btn) {
+  var inp = document.getElementById("mainInput");
+  var cmd = btn.textContent.trim();
+  inp.value = (inp.value ? inp.value+" · " : "/") + cmd;
+  inp.focus(); autoH(inp);
+}
+
+function sendMsg() {
+  var inp = document.getElementById("mainInput");
+  var v = inp.value.trim();
+  if(!v) return;
+  var area = document.getElementById("chatArea");
+
+  var ub = document.createElement("div");
+  ub.className = "bubble self";
+  ub.innerHTML = '<div class="b-av">叶</div><div class="b-txt">'+esc(v)+'</div>';
+  area.appendChild(ub);
+
+  var ab = document.createElement("div");
+  ab.className = "bubble";
+  ab.innerHTML = '<div class="b-av">✧</div><div class="b-txt"><div class="typing"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div></div>';
+  area.appendChild(ab);
+
+  inp.value = ""; autoH(inp);
+  setTimeout(function(){ ab.scrollIntoView({behavior:"smooth",block:"nearest"}); }, 80);
+}
+
+function autoH(el) {
+  el.style.height="auto";
+  el.style.height = Math.min(el.scrollHeight, 110)+"px";
+}
+
+document.getElementById("mainInput").addEventListener("keydown", function(e) {
+  if(e.key==="Enter" && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   PARTICLE FX (inside phone only)
+═══════════════════════════════════════════════════════════ */
+(function(){
+  var fx = document.getElementById("phoneFx");
+  var colors=["rgba(255,100,180,0.55)","rgba(200,50,255,0.45)","rgba(255,160,210,0.4)","rgba(140,50,255,0.38)","rgba(255,200,230,0.3)"];
+  for(var i=0;i<16;i++){
+    var p = document.createElement("div");
+    p.className="fx-particle";
+    var sz=(Math.random()*3.5+1.5).toFixed(1);
+    p.style.cssText="width:"+sz+"px;height:"+sz+"px;left:"+(Math.random()*100).toFixed(1)+"%;"+
+      "background:"+colors[Math.floor(Math.random()*colors.length)]+";"+
+      "animation-duration:"+(Math.random()*10+7).toFixed(1)+"s;"+
+      "animation-delay:"+(Math.random()*-14).toFixed(1)+"s;"+
+      "box-shadow:0 0 "+(parseFloat(sz)*2.5).toFixed(0)+"px "+colors[Math.floor(Math.random()*colors.length)]+";";
+    fx.appendChild(p);
+  }
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   REBIND — 供外部脚本调用
+   替换 CHAR_DATA 后调用 REBIND() 刷新所有UI
+═══════════════════════════════════════════════════════════ */
+window.REBIND = function(newData) {
+  if(newData) CHAR_DATA = newData;
+  renderAll();
+};
+
+/* ── 初始渲染 ── */
+renderAll();
+</script>
+</body>
+</html>
+```
