@@ -13,7 +13,7 @@
   --text0:rgba(165,225,255,0.92);--text1:rgba(105,185,225,0.70);--text2:rgba(65,145,185,0.50);
   --panel:rgba(8,18,36,0.96);
   --glow:0 0 14px rgba(0,200,255,0.22);
-  --vh:1vh;
+  --app-h:600px;
 }
 body.light{
   --bg:#ccd8e8;--bg1:#d4dff0;--bg2:#c0cede;
@@ -25,13 +25,10 @@ body.light{
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
-html, body {
-  width: 100%;
-  height: 100%;
-  height: -webkit-fill-available;
-  overflow: hidden;
-  background: var(--bg);
-  font-family: 'Courier New', Consolas, monospace;
+html,body{
+  width:100%;
+  background:var(--bg);
+  font-family:'Courier New',Consolas,monospace;
 }
 
 body::before{
@@ -39,27 +36,28 @@ body::before{
   background:repeating-linear-gradient(0deg,rgba(0,180,255,0.018) 0,rgba(0,180,255,0.018) 1px,transparent 1px,transparent 4px);
 }
 
-/* SHELL */
+/* SHELL — 核心修复：用固定高度而非继承高度 */
 .shell{
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  height: calc(var(--vh, 1vh) * 100);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  position:relative;
+  z-index:1;
+  width:100%;
+  height:var(--app-h);
+  max-height:var(--app-h);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--bg);
 }
 
 /* STATUS BAR */
 .sb{
-  flex-shrink: 0;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(4,10,22,0.92);
-  border-bottom: 1px solid var(--border1);
+  flex-shrink:0;
+  padding:8px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:rgba(4,10,22,0.92);
+  border-bottom:1px solid var(--border1);
 }
 body.light .sb{background:rgba(195,218,240,0.92);}
 .sb-side{font-size:10px;color:var(--text2);letter-spacing:1px;}
@@ -69,10 +67,10 @@ body.light .sb{background:rgba(195,218,240,0.92);}
 
 /* TABS */
 .tabs{
-  flex-shrink: 0;
-  display: flex;
-  background: rgba(4,10,22,0.97);
-  border-bottom: 1px solid var(--border1);
+  flex-shrink:0;
+  display:flex;
+  background:rgba(4,10,22,0.97);
+  border-bottom:1px solid var(--border1);
 }
 body.light .tabs{background:rgba(200,222,244,0.97);}
 .tab{
@@ -89,36 +87,33 @@ body.light .tabs{background:rgba(200,222,244,0.97);}
 .t-lbl{font-size:9px;color:var(--text2);letter-spacing:1.2px;text-transform:uppercase;transition:color .2s;}
 .tab.on .t-lbl{color:var(--c1);}
 
-/* PAGES CONTAINER — 关键修复 */
+/* PAGES CONTAINER */
 .pages{
-  flex: 1;
-  min-height: 0;      /* flex子项高度收缩修复 */
-  position: relative;
-  overflow: hidden;
+  flex:1;
+  min-height:0;
+  position:relative;
+  overflow:hidden;
 }
 
-/* INDIVIDUAL PAGE — 关键修复 */
+/* INDIVIDUAL PAGE */
 .page{
-  position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(6px);
-  transition: opacity .18s, transform .18s;
-  /* 隐藏滚动条但保留功能 */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  position:absolute;
+  top:0;right:0;bottom:0;left:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(6px);
+  transition:opacity .18s,transform .18s;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
 }
-.page::-webkit-scrollbar{
-  display: none;
-}
+.page::-webkit-scrollbar{display:none;}
 .page.on{
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
+  opacity:1;
+  pointer-events:auto;
+  transform:translateY(0);
 }
 
 /* COMMON COMPONENTS */
@@ -278,7 +273,7 @@ body.light .about{background:rgba(190,215,240,0.52);}
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="shell">
 
 <div class="sb">
   <span class="sb-side" id="sbTime">00:00</span>
@@ -582,13 +577,22 @@ var CHAR={
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function $id(id){return document.getElementById(id);}
 
-/* ── vh修复：酒馆WebView中window.innerHeight更可靠 ── */
-function setVH(){
-  var vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', vh + 'px');
+/* ── 核心修复：直接设置shell高度，不依赖父容器继承链 ── */
+function fitShell(){
+  var h=window.innerHeight;
+  var shell=$id('shell');
+  if(shell){
+    shell.style.height=h+'px';
+    shell.style.maxHeight=h+'px';
+  }
+  document.documentElement.style.setProperty('--app-h',h+'px');
 }
-setVH();
-window.addEventListener('resize', setVH);
+fitShell();
+window.addEventListener('resize',fitShell);
+/* 多次补算，兼容酒馆WebView延迟渲染 */
+setTimeout(fitShell,50);
+setTimeout(fitShell,200);
+setTimeout(fitShell,600);
 
 function renderScenes(){
   var g=$id('scGrid');if(!g)return;g.innerHTML='';
@@ -770,5 +774,3 @@ renderChar();
 </body>
 </html>
 ```
-
----
